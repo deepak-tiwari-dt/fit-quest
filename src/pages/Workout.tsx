@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Plus, Minus, TrendingUp, ChevronRight } from "lucide-react";
+import { X, Plus, Minus, TrendingUp, ChevronRight, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { WorkoutTimer } from "@/components/WorkoutTimer";
 
 const Workout = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const Workout = () => {
   const [exercise, setExercise] = useState<any>(null);
   const [allExercises, setAllExercises] = useState<any[]>([]);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
+  const [showTimer, setShowTimer] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -312,6 +314,19 @@ const Workout = () => {
                 <span className="font-semibold">Add Set</span>
               </button>
             </div>
+          </div>
+
+          {/* Timer Section */}
+          <div className="mb-8">
+            <Button
+              onClick={() => setShowTimer(!showTimer)}
+              variant="secondary"
+              className="w-full h-12 text-lg font-bold rounded-full mb-4"
+            >
+              <Timer className="w-5 h-5 mr-2" />
+              {showTimer ? "Hide Timer" : "Show Rest Timer"}
+            </Button>
+            {showTimer && <WorkoutTimer />}
           </div>
 
           {/* XP Gain */}

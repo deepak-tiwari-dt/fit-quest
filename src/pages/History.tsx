@@ -82,7 +82,7 @@ const History = () => {
                     </div>
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    {JSON.parse(workout.sets as any).map((set: any, idx: number) => (
+                    {workout.sets.map((set: any, idx: number) => (
                       <span key={idx} className="text-xs bg-primary/10 px-3 py-1 rounded-full">
                         Set {idx + 1}: {set.reps} reps
                       </span>

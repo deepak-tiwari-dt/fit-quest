@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Plus, Minus, TrendingUp } from "lucide-react";
+import { X, Plus, Minus, TrendingUp, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -21,13 +21,30 @@ const Workout = () => {
   ]);
   const [dailyChallenge, setDailyChallenge] = useState<any>(null);
   const [exercise, setExercise] = useState<any>(null);
+  const [allExercises, setAllExercises] = useState<any[]>([]);
+  const [showExerciseSelector, setShowExerciseSelector] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
+      fetchAllExercises();
       fetchDailyChallenge();
     }
   }, [user]);
+
+  const fetchAllExercises = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("exercises")
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
+      setAllExercises(data || []);
+    } catch (error: any) {
+      console.error("Error fetching exercises:", error);
+    }
+  };
 
   const fetchDailyChallenge = async () => {
     try {
@@ -41,12 +58,11 @@ const Workout = () => {
         `)
         .eq("user_id", user?.id)
         .eq("date", today)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
 
       if (!challenge) {
-        // Create a new daily challenge
         const { data: exercises } = await supabase
           .from("exercises")
           .select("*")
@@ -73,10 +89,22 @@ const Workout = () => {
       }
 
       setDailyChallenge(challenge);
-      setExercise(challenge?.exercises);
+      if (challenge?.exercises && !exercise) {
+        setExercise(challenge.exercises);
+      }
     } catch (error: any) {
       console.error("Error fetching daily challenge:", error);
     }
+  };
+
+  const selectExercise = (selectedExercise: any) => {
+    setExercise(selectedExercise);
+    setShowExerciseSelector(false);
+    setSets([
+      { id: 1, reps: 10 },
+      { id: 2, reps: 8 },
+      { id: 3, reps: 6 },
+    ]);
   };
 
   const updateReps = (id: number, delta: number) => {
@@ -176,8 +204,37 @@ const Workout = () => {
             </button>
           </div>
 
+          {/* Exercise Selector Modal */}
+          {showExerciseSelector && (
+            <div className="fixed inset-0 bg-background/95 z-50 p-6 overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold">Select Exercise</h2>
+                <button onClick={() => setShowExerciseSelector(false)}>
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {allExercises.map((ex) => (
+                  <button
+                    key={ex.id}
+                    onClick={() => selectExercise(ex)}
+                    className="w-full bg-secondary/30 rounded-2xl p-5 flex items-center justify-between hover:bg-secondary/50 transition-colors border border-transparent hover:border-primary"
+                  >
+                    <div className="text-left">
+                      <h3 className="font-bold text-lg mb-1">{ex.name}</h3>
+                      <p className="text-sm text-muted-foreground">{ex.description}</p>
+                      <p className="text-xs text-primary mt-1">{ex.xp_per_set} XP per set</p>
+                    </div>
+                    <ChevronRight className="w-6 h-6 text-muted-foreground" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Daily Challenge Card */}
-          {dailyChallenge && (
+          {dailyChallenge && exercise?.id === dailyChallenge.exercise_id && (
             <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-700/20 border-2 border-yellow-600/50 rounded-3xl p-6 mb-8">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-yellow-400 text-xl font-bold">Daily Challenge</h2>
@@ -199,13 +256,18 @@ const Workout = () => {
           {/* Exercise Section */}
           <div className="mb-8">
             <h3 className="text-xl font-bold mb-4">Exercise</h3>
-            <div className="bg-secondary/30 rounded-2xl p-4">
-              <Input
-                value={exercise?.name || "Loading..."}
-                readOnly
-                className="bg-transparent border-0 text-lg font-semibold focus-visible:ring-0"
-              />
-            </div>
+            <button
+              onClick={() => setShowExerciseSelector(true)}
+              className="w-full bg-secondary/30 rounded-2xl p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors"
+            >
+              <div className="text-left">
+                <p className="text-lg font-semibold">{exercise?.name || "Select Exercise"}</p>
+                {exercise?.description && (
+                  <p className="text-sm text-muted-foreground mt-1">{exercise.description}</p>
+                )}
+              </div>
+              <ChevronRight className="w-6 h-6 text-muted-foreground" />
+            </button>
           </div>
 
           {/* Sets Section */}

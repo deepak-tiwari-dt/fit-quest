@@ -1,16 +1,17 @@
-import { Dumbbell, User, Clock } from "lucide-react";
+import { Dumbbell, User, Clock, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface BottomNavProps {
-  active: "workout" | "profile" | "history";
+  active: "home" | "workout" | "profile" | "history";
 }
 
 export const BottomNav = ({ active }: BottomNavProps) => {
   const navigate = useNavigate();
 
   const navItems = [
+    { id: "home", label: "Home", icon: Home, path: "/" },
     { id: "workout", label: "Workout", icon: Dumbbell, path: "/workout" },
-    { id: "profile", label: "Profile", icon: User, path: "/" },
+    { id: "profile", label: "Profile", icon: User, path: "/profile" },
     { id: "history", label: "History", icon: Clock, path: "/history" },
   ];
 

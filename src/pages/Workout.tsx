@@ -24,7 +24,8 @@ const Workout = () => {
   const [exercise, setExercise] = useState<any>(null);
   const [allExercises, setAllExercises] = useState<any[]>([]);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
-  const [showTimer, setShowTimer] = useState(false);
+  const [showRestTimer, setShowRestTimer] = useState(false);
+  const [showWorkoutTimer, setShowWorkoutTimer] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -110,13 +111,21 @@ const Workout = () => {
   };
 
   const updateReps = (id: number, delta: number) => {
-    setSets(sets.map(set => 
-      set.id === id ? { ...set, reps: Math.max(0, set.reps + delta) } : set
-    ));
+    setSets(sets => {
+      const updatedSets = sets.map(set => 
+        set.id === id ? { ...set, reps: set.reps + delta } : set
+      ).filter(set => set.reps > 0);
+      return updatedSets;
+    });
+  };
+
+  const removeSet = (id: number) => {
+    setSets(sets.filter(set => set.id !== id));
   };
 
   const addSet = () => {
-    setSets([...sets, { id: sets.length + 1, reps: 8 }]);
+    const maxId = sets.length > 0 ? Math.max(...sets.map(s => s.id)) : 0;
+    setSets([...sets, { id: maxId + 1, reps: 8 }]);
   };
 
   const handleLogWorkout = async () => {
@@ -276,11 +285,11 @@ const Workout = () => {
           <div className="mb-8">
             <h3 className="text-xl font-bold mb-4">Sets</h3>
             <div className="space-y-3">
-              {sets.map((set) => (
+              {sets.map((set, index) => (
                 <div key={set.id} className="bg-secondary/30 rounded-2xl p-4 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary/20 text-primary rounded-full w-12 h-12 flex items-center justify-center font-bold">
-                      {set.id}
+                      {index + 1}
                     </div>
                     <span className="font-semibold">Reps</span>
                   </div>
@@ -302,6 +311,14 @@ const Workout = () => {
                     >
                       <Plus className="w-5 h-5" />
                     </Button>
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="rounded-full w-10 h-10"
+                      onClick={() => removeSet(set.id)}
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -317,16 +334,47 @@ const Workout = () => {
           </div>
 
           {/* Timer Section */}
-          <div className="mb-8">
-            <Button
-              onClick={() => setShowTimer(!showTimer)}
-              variant="secondary"
-              className="w-full h-12 text-lg font-bold rounded-full mb-4"
-            >
-              <Timer className="w-5 h-5 mr-2" />
-              {showTimer ? "Hide Timer" : "Show Rest Timer"}
-            </Button>
-            {showTimer && <WorkoutTimer />}
+          <div className="mb-8 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => setShowWorkoutTimer(!showWorkoutTimer)}
+                variant={showWorkoutTimer ? "default" : "secondary"}
+                className="h-12 text-sm font-bold rounded-full"
+              >
+                <Timer className="w-5 h-5 mr-2" />
+                Workout Timer
+              </Button>
+              <Button
+                onClick={() => setShowRestTimer(!showRestTimer)}
+                variant={showRestTimer ? "default" : "secondary"}
+                className="h-12 text-sm font-bold rounded-full"
+              >
+                <Timer className="w-5 h-5 mr-2" />
+                Rest Timer
+              </Button>
+            </div>
+            {showWorkoutTimer && (
+              <WorkoutTimer 
+                duration={1800}
+                onComplete={() => {
+                  toast({
+                    title: "Workout time complete!",
+                    description: "Great job! Time to wrap up.",
+                  });
+                }}
+              />
+            )}
+            {showRestTimer && (
+              <WorkoutTimer 
+                duration={60}
+                onComplete={() => {
+                  toast({
+                    title: "Rest complete!",
+                    description: "Time for your next set!",
+                  });
+                }}
+              />
+            )}
           </div>
 
           {/* XP Gain */}

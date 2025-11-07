@@ -5,6 +5,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Dumbbell } from "lucide-react";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address').max(255),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+const signupSchema = z.object({
+  email: z.string().email('Invalid email address').max(255),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Password must contain an uppercase letter')
+    .regex(/[a-z]/, 'Password must contain a lowercase letter')
+    .regex(/[0-9]/, 'Password must contain a number'),
+  username: z.string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be less than 20 characters')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+});
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -36,7 +55,20 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Validate inputs based on login or signup
       if (isLogin) {
+        const validation = loginSchema.safeParse({ email, password });
+        if (!validation.success) {
+          const firstError = validation.error.errors[0];
+          toast({
+            variant: "destructive",
+            title: "Validation Error",
+            description: firstError.message,
+          });
+          setLoading(false);
+          return;
+        }
+
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -49,6 +81,18 @@ const Auth = () => {
           description: "Successfully logged in",
         });
       } else {
+        const validation = signupSchema.safeParse({ email, password, username });
+        if (!validation.success) {
+          const firstError = validation.error.errors[0];
+          toast({
+            variant: "destructive",
+            title: "Validation Error",
+            description: firstError.message,
+          });
+          setLoading(false);
+          return;
+        }
+
         const { error } = await supabase.auth.signUp({
           email,
           password,

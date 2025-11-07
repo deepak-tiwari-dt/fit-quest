@@ -9,6 +9,7 @@ import Workout from "./pages/Workout";
 import History from "./pages/History";
 import InviteFriends from "./pages/InviteFriends";
 import Auth from "./pages/Auth";
+import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/history" element={<History />} />
           <Route path="/invite" element={<InviteFriends />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/install" element={<Install />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

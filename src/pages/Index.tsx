@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { BottomNav } from "@/components/BottomNav";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { InstallBanner } from "@/components/InstallBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -121,6 +122,7 @@ const Index = () => {
 
   return (
     <ProtectedRoute>
+      <InstallBanner />
       <div className="min-h-screen bg-background pb-20">
         <div className="p-6">
           {/* Header */}

@@ -43,7 +43,7 @@ const Profile = () => {
       if (error) throw error;
       setProfile(data);
     } catch (error: any) {
-      console.error("Error fetching profile:", error);
+      // Error handled silently - loading state persists
     } finally {
       setLoading(false);
     }
@@ -60,7 +60,7 @@ const Profile = () => {
       if (error) throw error;
       setLeaderboard(data || []);
     } catch (error: any) {
-      console.error("Error fetching leaderboard:", error);
+      // Error handled silently - empty leaderboard shown
     }
   };
 

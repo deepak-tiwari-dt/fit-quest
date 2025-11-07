@@ -32,7 +32,7 @@ const History = () => {
       if (error) throw error;
       setWorkouts(data || []);
     } catch (error: any) {
-      console.error("Error fetching workouts:", error);
+      // Error handled silently - user sees empty state
     } finally {
       setLoading(false);
     }

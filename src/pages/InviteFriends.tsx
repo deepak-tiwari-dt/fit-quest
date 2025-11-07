@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { X, Link2, UserPlus, Send, Users, Flame, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,9 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const searchSchema = z.string().max(50).regex(/^[a-zA-Z0-9_\s]*$/);
 
 const InviteFriends = () => {
   const navigate = useNavigate();
@@ -36,26 +39,41 @@ const InviteFriends = () => {
   ];
 
   useEffect(() => {
-    if (searchQuery.length > 0) {
-      searchUsers();
-    } else {
-      setSearchResults([]);
-    }
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.length > 0) {
+        searchUsers();
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
   const searchUsers = async () => {
     try {
+      // Validate search query
+      const validation = searchSchema.safeParse(searchQuery);
+      if (!validation.success) {
+        setSearchResults([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .ilike("username", `%${searchQuery}%`)
+        .ilike("username", `%${validation.data}%`)
         .neq("id", user?.id)
         .limit(10);
 
       if (error) throw error;
       setSearchResults(data || []);
     } catch (error: any) {
-      console.error("Error searching users:", error);
+      toast({
+        variant: "destructive",
+        title: "Search failed",
+        description: "Please try again later",
+      });
     }
   };
 

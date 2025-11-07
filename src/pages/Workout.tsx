@@ -45,7 +45,7 @@ const Workout = () => {
       if (error) throw error;
       setAllExercises(data || []);
     } catch (error: any) {
-      console.error("Error fetching exercises:", error);
+      // Error handled silently - empty exercise list shown
     }
   };
 
@@ -96,7 +96,7 @@ const Workout = () => {
         setExercise(challenge.exercises);
       }
     } catch (error: any) {
-      console.error("Error fetching daily challenge:", error);
+      // Error handled silently - no daily challenge shown
     }
   };
 

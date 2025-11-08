@@ -130,7 +130,7 @@ const Auth = () => {
           <div className="bg-primary/20 rounded-full p-6 mb-4">
             <Dumbbell className="w-16 h-16 text-primary" />
           </div>
-          <h1 className="text-4xl font-bold mb-2">FitQuest</h1>
+          <h1 className="text-4xl font-bold mb-2">Fit Quest</h1>
           <p className="text-muted-foreground">Track your fitness journey</p>
         </div>
 

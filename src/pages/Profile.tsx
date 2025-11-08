@@ -68,6 +68,68 @@ const Profile = () => {
     navigate("/auth");
   };
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Upload to storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Update profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setProfile({ ...profile, avatar_url: publicUrl });
+      
+      toast({
+        title: "Success",
+        description: "Profile photo updated successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error uploading photo",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const menuItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: Dumbbell, label: "Workout", path: "/workout" },
@@ -153,9 +215,16 @@ const Profile = () => {
             <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full w-14 h-14 flex items-center justify-center font-bold text-xl border-4 border-background shadow-lg">
               {profile.level}
             </div>
-            <button className="absolute top-0 right-0 bg-background rounded-full p-2 shadow-lg border-2 border-border hover:bg-secondary transition-colors">
+            <label htmlFor="avatar-upload" className="absolute top-0 right-0 bg-background rounded-full p-2 shadow-lg border-2 border-border hover:bg-secondary transition-colors cursor-pointer">
               <Camera className="w-5 h-5" />
-            </button>
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
+            </label>
           </div>
           <h2 className="text-3xl font-bold mb-2">{profile.username}</h2>
           <p className="text-muted-foreground">Total XP: {profile.total_xp.toLocaleString()}</p>

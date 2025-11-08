@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -204,205 +203,203 @@ const Workout = () => {
   const estimatedXp = sets.length * (exercise?.xp_per_set || 5);
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-background pb-20">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-2xl font-bold">Workout</h1>
-            <button onClick={() => navigate('/')}>
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-
-          {/* Exercise Selector Modal */}
-          {showExerciseSelector && (
-            <div className="fixed inset-0 bg-background/95 z-50 p-6 overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">Select Exercise</h2>
-                <button onClick={() => setShowExerciseSelector(false)}>
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {allExercises.map((ex) => (
-                  <button
-                    key={ex.id}
-                    onClick={() => selectExercise(ex)}
-                    className="w-full bg-secondary/30 rounded-2xl p-5 flex items-center justify-between hover:bg-secondary/50 transition-colors border border-transparent hover:border-primary"
-                  >
-                    <div className="text-left">
-                      <h3 className="font-bold text-lg mb-1">{ex.name}</h3>
-                      <p className="text-sm text-muted-foreground">{ex.description}</p>
-                      <p className="text-xs text-primary mt-1">{ex.xp_per_set} XP per set</p>
-                    </div>
-                    <ChevronRight className="w-6 h-6 text-muted-foreground" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Daily Challenge Card */}
-          {dailyChallenge && exercise?.id === dailyChallenge.exercise_id && (
-            <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-700/20 border-2 border-yellow-600/50 rounded-3xl p-6 mb-8">
-              <div className="flex justify-between items-start mb-4">
-                <h2 className="text-yellow-400 text-xl font-bold">Daily Challenge</h2>
-                <span className="text-yellow-400 font-bold text-lg">{dailyChallenge.xp_reward} XP</span>
-              </div>
-              <p className="text-foreground/80 mb-4">
-                Complete {dailyChallenge.target_sets} sets of {exercise?.name} to earn extra XP!
-              </p>
-              <Progress 
-                value={(dailyChallenge.completed_sets / dailyChallenge.target_sets) * 100} 
-                className="h-3 mb-2"
-              />
-              <p className="text-sm text-muted-foreground text-right">
-                {dailyChallenge.completed_sets}/{dailyChallenge.target_sets} Sets Completed
-              </p>
-            </div>
-          )}
-
-          {/* Exercise Section */}
-          <div className="mb-8">
-            <h3 className="text-xl font-bold mb-4">Exercise</h3>
-            <button
-              onClick={() => setShowExerciseSelector(true)}
-              className="w-full bg-secondary/30 rounded-2xl p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors"
-            >
-              <div className="text-left">
-                <p className="text-lg font-semibold">{exercise?.name || "Select Exercise"}</p>
-                {exercise?.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{exercise.description}</p>
-                )}
-              </div>
-              <ChevronRight className="w-6 h-6 text-muted-foreground" />
-            </button>
-          </div>
-
-          {/* Sets Section */}
-          <div className="mb-8">
-            <h3 className="text-xl font-bold mb-4">Sets</h3>
-            <div className="space-y-3">
-              {sets.map((set, index) => (
-                <div key={set.id} className="bg-secondary/30 rounded-2xl p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-primary/20 text-primary rounded-full w-12 h-12 flex items-center justify-center font-bold">
-                      {index + 1}
-                    </div>
-                    <span className="font-semibold">Reps</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="rounded-full w-10 h-10"
-                      onClick={() => updateReps(set.id, -1)}
-                    >
-                      <Minus className="w-5 h-5" />
-                    </Button>
-                    <span className="text-2xl font-bold w-12 text-center">{set.reps}</span>
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="rounded-full w-10 h-10"
-                      onClick={() => updateReps(set.id, 1)}
-                    >
-                      <Plus className="w-5 h-5" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      className="rounded-full w-10 h-10"
-                      onClick={() => removeSet(set.id)}
-                    >
-                      <X className="w-5 h-5" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              
-              <button
-                onClick={addSet}
-                className="w-full border-2 border-dashed border-primary/30 rounded-2xl p-6 flex items-center justify-center gap-2 text-primary hover:bg-primary/5 transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-                <span className="font-semibold">Add Set</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Timer Section */}
-          <div className="mb-8 space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                onClick={() => setShowWorkoutTimer(!showWorkoutTimer)}
-                variant={showWorkoutTimer ? "default" : "secondary"}
-                className="h-12 text-sm font-bold rounded-full"
-              >
-                <Timer className="w-5 h-5 mr-2" />
-                Workout Timer
-              </Button>
-              <Button
-                onClick={() => setShowRestTimer(!showRestTimer)}
-                variant={showRestTimer ? "default" : "secondary"}
-                className="h-12 text-sm font-bold rounded-full"
-              >
-                <Timer className="w-5 h-5 mr-2" />
-                Rest Timer
-              </Button>
-            </div>
-            {showWorkoutTimer && (
-              <WorkoutTimer 
-                duration={1800}
-                onComplete={() => {
-                  toast({
-                    title: "Workout time complete!",
-                    description: "Great job! Time to wrap up.",
-                  });
-                }}
-              />
-            )}
-            {showRestTimer && (
-              <WorkoutTimer 
-                duration={60}
-                onComplete={() => {
-                  toast({
-                    title: "Rest complete!",
-                    description: "Time for your next set!",
-                  });
-                }}
-              />
-            )}
-          </div>
-
-          {/* XP Gain */}
-          <div className="bg-secondary/30 rounded-2xl p-6 mb-8">
-            <h3 className="text-xl font-bold mb-4">XP Gain</h3>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Estimated XP</span>
-              <div className="flex items-center gap-2 text-green-400">
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-2xl font-bold">{estimatedXp} XP</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Log Workout Button */}
-          <Button 
-            className="w-full h-14 text-lg font-bold rounded-full"
-            size="lg"
-            onClick={handleLogWorkout}
-            disabled={loading}
-          >
-            {loading ? "Logging..." : "Log Workout"}
-          </Button>
+    <div className="min-h-screen bg-background pb-20">
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold">Workout</h1>
+          <button onClick={() => navigate('/')}>
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
-        <BottomNav active="workout" />
+        {/* Exercise Selector Modal */}
+        {showExerciseSelector && (
+          <div className="fixed inset-0 bg-background/95 z-50 p-6 overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold">Select Exercise</h2>
+              <button onClick={() => setShowExerciseSelector(false)}>
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {allExercises.map((ex) => (
+                <button
+                  key={ex.id}
+                  onClick={() => selectExercise(ex)}
+                  className="w-full bg-secondary/30 rounded-2xl p-5 flex items-center justify-between hover:bg-secondary/50 transition-colors border border-transparent hover:border-primary"
+                >
+                  <div className="text-left">
+                    <h3 className="font-bold text-lg mb-1">{ex.name}</h3>
+                    <p className="text-sm text-muted-foreground">{ex.description}</p>
+                    <p className="text-xs text-primary mt-1">{ex.xp_per_set} XP per set</p>
+                  </div>
+                  <ChevronRight className="w-6 h-6 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Daily Challenge Card */}
+        {dailyChallenge && exercise?.id === dailyChallenge.exercise_id && (
+          <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-700/20 border-2 border-yellow-600/50 rounded-3xl p-6 mb-8">
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-yellow-400 text-xl font-bold">Daily Challenge</h2>
+              <span className="text-yellow-400 font-bold text-lg">{dailyChallenge.xp_reward} XP</span>
+            </div>
+            <p className="text-foreground/80 mb-4">
+              Complete {dailyChallenge.target_sets} sets of {exercise?.name} to earn extra XP!
+            </p>
+            <Progress 
+              value={(dailyChallenge.completed_sets / dailyChallenge.target_sets) * 100} 
+              className="h-3 mb-2"
+            />
+            <p className="text-sm text-muted-foreground text-right">
+              {dailyChallenge.completed_sets}/{dailyChallenge.target_sets} Sets Completed
+            </p>
+          </div>
+        )}
+
+        {/* Exercise Section */}
+        <div className="mb-8">
+          <h3 className="text-xl font-bold mb-4">Exercise</h3>
+          <button
+            onClick={() => setShowExerciseSelector(true)}
+            className="w-full bg-secondary/30 rounded-2xl p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors"
+          >
+            <div className="text-left">
+              <p className="text-lg font-semibold">{exercise?.name || "Select Exercise"}</p>
+              {exercise?.description && (
+                <p className="text-sm text-muted-foreground mt-1">{exercise.description}</p>
+              )}
+            </div>
+            <ChevronRight className="w-6 h-6 text-muted-foreground" />
+          </button>
+        </div>
+
+        {/* Sets Section */}
+        <div className="mb-8">
+          <h3 className="text-xl font-bold mb-4">Sets</h3>
+          <div className="space-y-3">
+            {sets.map((set, index) => (
+              <div key={set.id} className="bg-secondary/30 rounded-2xl p-4 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="bg-primary/20 text-primary rounded-full w-12 h-12 flex items-center justify-center font-bold">
+                    {index + 1}
+                  </div>
+                  <span className="font-semibold">Reps</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="rounded-full w-10 h-10"
+                    onClick={() => updateReps(set.id, -1)}
+                  >
+                    <Minus className="w-5 h-5" />
+                  </Button>
+                  <span className="text-2xl font-bold w-12 text-center">{set.reps}</span>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="rounded-full w-10 h-10"
+                    onClick={() => updateReps(set.id, 1)}
+                  >
+                    <Plus className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    className="rounded-full w-10 h-10"
+                    onClick={() => removeSet(set.id)}
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+            
+            <button
+              onClick={addSet}
+              className="w-full border-2 border-dashed border-primary/30 rounded-2xl p-6 flex items-center justify-center gap-2 text-primary hover:bg-primary/5 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="font-semibold">Add Set</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Timer Section */}
+        <div className="mb-8 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={() => setShowWorkoutTimer(!showWorkoutTimer)}
+              variant={showWorkoutTimer ? "default" : "secondary"}
+              className="h-12 text-sm font-bold rounded-full"
+            >
+              <Timer className="w-5 h-5 mr-2" />
+              Workout Timer
+            </Button>
+            <Button
+              onClick={() => setShowRestTimer(!showRestTimer)}
+              variant={showRestTimer ? "default" : "secondary"}
+              className="h-12 text-sm font-bold rounded-full"
+            >
+              <Timer className="w-5 h-5 mr-2" />
+              Rest Timer
+            </Button>
+          </div>
+          {showWorkoutTimer && (
+            <WorkoutTimer 
+              duration={1800}
+              onComplete={() => {
+                toast({
+                  title: "Workout time complete!",
+                  description: "Great job! Time to wrap up.",
+                });
+              }}
+            />
+          )}
+          {showRestTimer && (
+            <WorkoutTimer 
+              duration={60}
+              onComplete={() => {
+                toast({
+                  title: "Rest complete!",
+                  description: "Time for your next set!",
+                });
+              }}
+            />
+          )}
+        </div>
+
+        {/* XP Gain */}
+        <div className="bg-secondary/30 rounded-2xl p-6 mb-8">
+          <h3 className="text-xl font-bold mb-4">XP Gain</h3>
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Estimated XP</span>
+            <div className="flex items-center gap-2 text-green-400">
+              <TrendingUp className="w-5 h-5" />
+              <span className="text-2xl font-bold">{estimatedXp} XP</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Log Workout Button */}
+        <Button 
+          className="w-full h-14 text-lg font-bold rounded-full"
+          size="lg"
+          onClick={handleLogWorkout}
+          disabled={loading}
+        >
+          {loading ? "Logging..." : "Log Workout"}
+        </Button>
       </div>
-    </ProtectedRoute>
+
+      <BottomNav active="workout" />
+    </div>
   );
 };
 

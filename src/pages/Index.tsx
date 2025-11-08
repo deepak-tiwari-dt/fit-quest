@@ -4,7 +4,6 @@ import { Dumbbell, TrendingUp, Calendar, Trophy, Zap, Target } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { BottomNav } from "@/components/BottomNav";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { InstallBanner } from "@/components/InstallBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -121,7 +120,7 @@ const Index = () => {
   const currentLevelXp = profile.total_xp % xpForNextLevel;
 
   return (
-    <ProtectedRoute>
+    <>
       <InstallBanner />
       <div className="min-h-screen bg-background pb-20">
         <div className="p-6">
@@ -240,7 +239,7 @@ const Index = () => {
 
         <BottomNav active="home" />
       </div>
-    </ProtectedRoute>
+    </>
   );
 };
 

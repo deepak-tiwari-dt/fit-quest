@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -112,93 +112,93 @@ const InviteFriends = () => {
   };
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-background">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <button onClick={() => navigate('/')}>
-              <X className="w-6 h-6" />
-            </button>
-            <h1 className="text-2xl font-bold">Invite Friends</h1>
-            <div className="w-6" />
-          </div>
+    <div className="min-h-screen bg-background pb-20">
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <button onClick={() => navigate('/')}>
+            <X className="w-6 h-6" />
+          </button>
+          <h1 className="text-2xl font-bold">Invite Friends</h1>
+          <div className="w-6" />
+        </div>
 
-          {/* Main Title */}
-          <h2 className="text-3xl font-bold mb-8">Invite your friends</h2>
+        {/* Main Title */}
+        <h2 className="text-3xl font-bold mb-8">Invite your friends</h2>
 
-          {/* Action Cards */}
-          <div className="space-y-4 mb-8">
-            <button 
-              onClick={copyInviteLink}
-              className="w-full bg-secondary/30 rounded-2xl p-6 flex items-center justify-between hover:bg-secondary/40 transition-colors"
-            >
-              <div className="flex items-center gap-4">
-                <div className="bg-primary/20 rounded-full p-4">
-                  <Link2 className="w-6 h-6 text-primary" />
-                </div>
-                <span className="font-semibold text-lg">Share invite link</span>
+        {/* Action Cards */}
+        <div className="space-y-4 mb-8">
+          <button 
+            onClick={copyInviteLink}
+            className="w-full bg-secondary/30 rounded-2xl p-6 flex items-center justify-between hover:bg-secondary/40 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <div className="bg-primary/20 rounded-full p-4">
+                <Link2 className="w-6 h-6 text-primary" />
               </div>
-              <ChevronDown className="w-5 h-5 rotate-[-90deg]" />
-            </button>
-          </div>
+              <span className="font-semibold text-lg">Share invite link</span>
+            </div>
+            <ChevronDown className="w-5 h-5 rotate-[-90deg]" />
+          </button>
+        </div>
 
-          {/* How it Works Collapsible */}
-          <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-8">
-            <CollapsibleTrigger asChild>
-              <button className="w-full bg-secondary/30 rounded-2xl p-6 flex items-center justify-between hover:bg-secondary/40 transition-colors">
-                <span className="font-semibold text-lg">How it works</span>
-                <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? '' : 'rotate-[-90deg]'}`} />
-              </button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-4 space-y-4">
-              {howItWorks.map((item, index) => (
-                <div key={index} className="flex gap-4">
-                  <div className="bg-primary/20 rounded-full p-3 h-fit">
-                    <item.icon className="w-6 h-6 text-primary" />
-                  </div>
+        {/* How it Works Collapsible */}
+        <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-8">
+          <CollapsibleTrigger asChild>
+            <button className="w-full bg-secondary/30 rounded-2xl p-6 flex items-center justify-between hover:bg-secondary/40 transition-colors">
+              <span className="font-semibold text-lg">How it works</span>
+              <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? '' : 'rotate-[-90deg]'}`} />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4 space-y-4">
+            {howItWorks.map((item, index) => (
+              <div key={index} className="flex gap-4">
+                <div className="bg-primary/20 rounded-full p-3 h-fit">
+                  <item.icon className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold mb-1">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                </div>
+              </div>
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Search Section */}
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold mb-4">Search for friends</h3>
+          <Input
+            placeholder="Search for username"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-secondary/30 border-0 h-14 rounded-2xl text-base"
+          />
+          
+          {searchResults.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {searchResults.map((profile) => (
+                <div key={profile.id} className="bg-secondary/30 rounded-2xl p-4 flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold mb-1">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                    <p className="font-semibold">{profile.username}</p>
+                    <p className="text-sm text-muted-foreground">Level {profile.level}</p>
                   </div>
+                  <Button
+                    size="sm"
+                    onClick={() => sendFriendRequest(profile.id)}
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Add
+                  </Button>
                 </div>
               ))}
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Search Section */}
-          <div className="mb-8">
-            <h3 className="text-2xl font-bold mb-4">Search for friends</h3>
-            <Input
-              placeholder="Search for username"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-secondary/30 border-0 h-14 rounded-2xl text-base"
-            />
-            
-            {searchResults.length > 0 && (
-              <div className="mt-4 space-y-2">
-                {searchResults.map((profile) => (
-                  <div key={profile.id} className="bg-secondary/30 rounded-2xl p-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold">{profile.username}</p>
-                      <p className="text-sm text-muted-foreground">Level {profile.level}</p>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => sendFriendRequest(profile.id)}
-                    >
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Add
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
-    </ProtectedRoute>
+
+      <BottomNav active="home" />
+    </div>
   );
 };
 

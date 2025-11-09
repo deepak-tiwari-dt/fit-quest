@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 interface WorkoutTimerProps {
   duration?: number; // in seconds
   onComplete?: () => void;
+  label?: string;
 }
 
-export const WorkoutTimer = ({ duration = 60, onComplete }: WorkoutTimerProps) => {
+export const WorkoutTimer = ({ duration = 60, onComplete, label = "Timer" }: WorkoutTimerProps) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -45,7 +46,7 @@ export const WorkoutTimer = ({ duration = 60, onComplete }: WorkoutTimerProps) =
 
   return (
     <div className="bg-secondary/30 rounded-2xl p-6 border border-border">
-      <h3 className="text-lg font-bold mb-4 text-center">Rest Timer</h3>
+      <h3 className="text-lg font-bold mb-4 text-center">{label}</h3>
       
       {/* Circular Progress */}
       <div className="relative w-40 h-40 mx-auto mb-6">

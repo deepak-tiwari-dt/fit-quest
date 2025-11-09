@@ -359,9 +359,9 @@ const Workout = () => {
           </div>
           {showWorkoutTimer && (
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-muted-foreground">Workout Timer</h4>
               <WorkoutTimer 
                 duration={1800}
+                label="Workout Timer"
                 onComplete={() => {
                   toast({
                     title: "Workout time complete!",
@@ -374,9 +374,9 @@ const Workout = () => {
           )}
           {showRestTimer && (
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-muted-foreground">Rest Timer</h4>
               <WorkoutTimer 
                 duration={60}
+                label="Rest Timer"
                 onComplete={() => {
                   toast({
                     title: "Rest complete!",

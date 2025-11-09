@@ -335,7 +335,10 @@ const Workout = () => {
         <div className="mb-8 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <Button
-              onClick={() => setShowWorkoutTimer(!showWorkoutTimer)}
+              onClick={() => {
+                setShowWorkoutTimer(!showWorkoutTimer);
+                if (!showWorkoutTimer) setShowRestTimer(false);
+              }}
               variant={showWorkoutTimer ? "default" : "secondary"}
               className="h-12 text-sm font-bold rounded-full"
             >
@@ -343,7 +346,10 @@ const Workout = () => {
               Workout Timer
             </Button>
             <Button
-              onClick={() => setShowRestTimer(!showRestTimer)}
+              onClick={() => {
+                setShowRestTimer(!showRestTimer);
+                if (!showRestTimer) setShowWorkoutTimer(false);
+              }}
               variant={showRestTimer ? "default" : "secondary"}
               className="h-12 text-sm font-bold rounded-full"
             >
@@ -352,26 +358,34 @@ const Workout = () => {
             </Button>
           </div>
           {showWorkoutTimer && (
-            <WorkoutTimer 
-              duration={1800}
-              onComplete={() => {
-                toast({
-                  title: "Workout time complete!",
-                  description: "Great job! Time to wrap up.",
-                });
-              }}
-            />
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold text-muted-foreground">Workout Timer</h4>
+              <WorkoutTimer 
+                duration={1800}
+                onComplete={() => {
+                  toast({
+                    title: "Workout time complete!",
+                    description: "Great job! Time to wrap up.",
+                  });
+                  setShowWorkoutTimer(false);
+                }}
+              />
+            </div>
           )}
           {showRestTimer && (
-            <WorkoutTimer 
-              duration={60}
-              onComplete={() => {
-                toast({
-                  title: "Rest complete!",
-                  description: "Time for your next set!",
-                });
-              }}
-            />
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold text-muted-foreground">Rest Timer</h4>
+              <WorkoutTimer 
+                duration={60}
+                onComplete={() => {
+                  toast({
+                    title: "Rest complete!",
+                    description: "Time for your next set!",
+                  });
+                  setShowRestTimer(false);
+                }}
+              />
+            </div>
           )}
         </div>
 

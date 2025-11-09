@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { StatCard } from "@/components/StatCard";
 import { LeaderboardItem } from "@/components/LeaderboardItem";
 import { BottomNav } from "@/components/BottomNav";
+import { ImageCropDialog } from "@/components/ImageCropDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +24,8 @@ const Profile = () => {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string>("");
 
   useEffect(() => {
     if (user) {
@@ -68,9 +71,9 @@ const Profile = () => {
     navigate("/auth");
   };
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
 
     // Validate file type and size
     if (!file.type.startsWith('image/')) {
@@ -91,14 +94,25 @@ const Profile = () => {
       return;
     }
 
+    // Read the file and open crop dialog
+    const reader = new FileReader();
+    reader.onload = () => {
+      setSelectedImage(reader.result as string);
+      setCropDialogOpen(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCroppedImage = async (croppedBlob: Blob) => {
+    if (!user) return;
+
     try {
       // Upload to storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${Date.now()}.jpg`;
       
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, croppedBlob, { upsert: true });
 
       if (uploadError) throw uploadError;
 
@@ -222,7 +236,7 @@ const Profile = () => {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={handleAvatarUpload}
+                onChange={handleImageSelect}
               />
             </label>
           </div>
@@ -312,6 +326,13 @@ const Profile = () => {
       </div>
 
       <BottomNav active="profile" />
+      
+      <ImageCropDialog
+        image={selectedImage}
+        open={cropDialogOpen}
+        onClose={() => setCropDialogOpen(false)}
+        onCropComplete={handleCroppedImage}
+      />
     </div>
   );
 };

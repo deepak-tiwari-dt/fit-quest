@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Plus, Minus, TrendingUp, ChevronRight, Timer } from "lucide-react";
+import { X, Plus, Minus, TrendingUp, ChevronRight, Timer, Search, Dumbbell, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -22,6 +22,8 @@ const Workout = () => {
   const [dailyChallenge, setDailyChallenge] = useState<any>(null);
   const [exercise, setExercise] = useState<any>(null);
   const [allExercises, setAllExercises] = useState<any[]>([]);
+  const [filteredExercises, setFilteredExercises] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
   const [showRestTimer, setShowRestTimer] = useState(false);
   const [showWorkoutTimer, setShowWorkoutTimer] = useState(false);
@@ -42,11 +44,25 @@ const Workout = () => {
         .order("name");
 
       if (error) throw error;
-      setAllExercises(data || []);
+      const exercises = data || [];
+      setAllExercises(exercises);
+      setFilteredExercises(exercises);
     } catch (error: any) {
       // Error handled silently - empty exercise list shown
     }
   };
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredExercises(allExercises);
+    } else {
+      const filtered = allExercises.filter(ex =>
+        ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ex.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredExercises(filtered);
+    }
+  }, [searchQuery, allExercises]);
 
   const fetchDailyChallenge = async () => {
     try {
@@ -201,79 +217,154 @@ const Workout = () => {
   const estimatedXp = sets.length * (exercise?.xp_per_set || 5);
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5 pb-20">
       <div className="p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold">Workout</h1>
-          <button onClick={() => navigate('/')}>
+        {/* Header - Enhanced */}
+        <div className="flex items-center justify-between mb-8 animate-fade-in">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Workout
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">Build your strength</p>
+          </div>
+          <button 
+            onClick={() => navigate('/')}
+            className="bg-secondary/30 hover:bg-secondary/50 rounded-full p-3 transition-all duration-300 hover:scale-110"
+          >
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Exercise Selector Modal */}
+        {/* Exercise Selector Modal - Enhanced */}
         {showExerciseSelector && (
-          <div className="fixed inset-0 bg-background/95 z-50 p-6 overflow-y-auto">
+          <div className="fixed inset-0 bg-background/98 backdrop-blur-sm z-50 p-6 overflow-y-auto animate-fade-in">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Select Exercise</h2>
-              <button onClick={() => setShowExerciseSelector(false)}>
+              <div>
+                <h2 className="text-3xl font-bold">Select Exercise</h2>
+                <p className="text-sm text-muted-foreground mt-1">{filteredExercises.length} exercises available</p>
+              </div>
+              <button 
+                onClick={() => {
+                  setShowExerciseSelector(false);
+                  setSearchQuery("");
+                }}
+                className="bg-secondary/30 hover:bg-secondary/50 rounded-full p-3 transition-all"
+              >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="space-y-3">
-              {allExercises.map((ex) => (
-                <button
-                  key={ex.id}
-                  onClick={() => selectExercise(ex)}
-                  className="w-full bg-secondary/30 rounded-2xl p-5 flex items-center justify-between hover:bg-secondary/50 transition-colors border border-transparent hover:border-primary"
-                >
-                  <div className="text-left">
-                    <h3 className="font-bold text-lg mb-1">{ex.name}</h3>
-                    <p className="text-sm text-muted-foreground">{ex.description}</p>
-                    <p className="text-xs text-primary mt-1">{ex.xp_per_set} XP per set</p>
-                  </div>
-                  <ChevronRight className="w-6 h-6 text-muted-foreground" />
-                </button>
-              ))}
+            {/* Search Bar */}
+            <div className="relative mb-6">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search exercises..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 h-14 text-lg rounded-2xl bg-secondary/30 border-border focus:border-primary"
+              />
+            </div>
+
+            {/* Exercise List */}
+            <div className="space-y-3 pb-6">
+              {filteredExercises.length === 0 ? (
+                <div className="text-center py-12">
+                  <Dumbbell className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">No exercises found</p>
+                </div>
+              ) : (
+                filteredExercises.map((ex, index) => (
+                  <button
+                    key={ex.id}
+                    onClick={() => {
+                      selectExercise(ex);
+                      setSearchQuery("");
+                    }}
+                    className="group w-full bg-gradient-to-r from-secondary/40 to-secondary/20 rounded-2xl p-5 flex items-center justify-between hover:from-secondary/60 hover:to-secondary/40 transition-all duration-300 border border-border hover:border-primary/50 shadow-sm hover:shadow-md animate-fade-in"
+                    style={{ animationDelay: `${index * 0.02}s` }}
+                  >
+                    <div className="text-left flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="bg-primary/20 rounded-lg p-2 group-hover:scale-110 transition-transform">
+                          <Dumbbell className="w-4 h-4 text-primary" />
+                        </div>
+                        <h3 className="font-bold text-lg">{ex.name}</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground ml-10">{ex.description}</p>
+                      <div className="flex items-center gap-1 ml-10 mt-2">
+                        <Zap className="w-4 h-4 text-primary" />
+                        <p className="text-xs font-semibold text-primary">{ex.xp_per_set} XP per set</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-6 h-6 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                  </button>
+                ))
+              )}
             </div>
           </div>
         )}
 
-        {/* Daily Challenge Card */}
+        {/* Daily Challenge Card - Enhanced */}
         {dailyChallenge && exercise?.id === dailyChallenge.exercise_id && (
-          <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-700/20 border-2 border-yellow-600/50 rounded-3xl p-6 mb-8">
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-yellow-400 text-xl font-bold">Daily Challenge</h2>
-              <span className="text-yellow-400 font-bold text-lg">{dailyChallenge.xp_reward} XP</span>
+          <div className="relative overflow-hidden bg-gradient-to-br from-yellow-600/30 via-yellow-600/20 to-yellow-700/10 border-2 border-yellow-600/40 rounded-3xl p-6 mb-8 animate-fade-in shadow-lg">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-400/20 rounded-full blur-2xl" />
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-yellow-600/40 rounded-2xl p-3">
+                    <Zap className="w-6 h-6 text-yellow-300" />
+                  </div>
+                  <h2 className="text-yellow-300 text-xl font-bold">Daily Challenge</h2>
+                </div>
+                <div className="bg-yellow-600/40 px-4 py-2 rounded-full">
+                  <span className="text-yellow-300 font-bold text-lg">+{dailyChallenge.xp_reward} XP</span>
+                </div>
+              </div>
+              <p className="text-foreground/90 mb-4 font-medium">
+                Complete {dailyChallenge.target_sets} sets of {exercise?.name}
+              </p>
+              <div className="space-y-2">
+                <Progress 
+                  value={(dailyChallenge.completed_sets / dailyChallenge.target_sets) * 100} 
+                  className="h-3 bg-yellow-900/30"
+                />
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-foreground/70">Progress</span>
+                  <span className="text-sm font-bold text-yellow-300">
+                    {dailyChallenge.completed_sets}/{dailyChallenge.target_sets} Sets
+                  </span>
+                </div>
+              </div>
             </div>
-            <p className="text-foreground/80 mb-4">
-              Complete {dailyChallenge.target_sets} sets of {exercise?.name} to earn extra XP!
-            </p>
-            <Progress 
-              value={(dailyChallenge.completed_sets / dailyChallenge.target_sets) * 100} 
-              className="h-3 mb-2"
-            />
-            <p className="text-sm text-muted-foreground text-right">
-              {dailyChallenge.completed_sets}/{dailyChallenge.target_sets} Sets Completed
-            </p>
           </div>
         )}
 
-        {/* Exercise Section */}
-        <div className="mb-8">
+        {/* Exercise Section - Enhanced */}
+        <div className="mb-8 animate-fade-in">
           <h3 className="text-xl font-bold mb-4">Exercise</h3>
           <button
             onClick={() => setShowExerciseSelector(true)}
-            className="w-full bg-secondary/30 rounded-2xl p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors"
+            className="group w-full bg-gradient-to-r from-secondary/40 to-secondary/20 rounded-2xl p-5 flex items-center justify-between hover:from-secondary/60 hover:to-secondary/40 transition-all duration-300 border border-border hover:border-primary/50 shadow-sm hover:shadow-md"
           >
-            <div className="text-left">
-              <p className="text-lg font-semibold">{exercise?.name || "Select Exercise"}</p>
+            <div className="text-left flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="bg-primary/20 rounded-lg p-2 group-hover:scale-110 transition-transform">
+                  <Dumbbell className="w-5 h-5 text-primary" />
+                </div>
+                <p className="text-lg font-bold">{exercise?.name || "Select Exercise"}</p>
+              </div>
               {exercise?.description && (
-                <p className="text-sm text-muted-foreground mt-1">{exercise.description}</p>
+                <p className="text-sm text-muted-foreground ml-11">{exercise.description}</p>
+              )}
+              {exercise?.xp_per_set && (
+                <div className="flex items-center gap-1 ml-11 mt-2">
+                  <Zap className="w-4 h-4 text-primary" />
+                  <p className="text-xs font-semibold text-primary">{exercise.xp_per_set} XP per set</p>
+                </div>
               )}
             </div>
-            <ChevronRight className="w-6 h-6 text-muted-foreground" />
+            <ChevronRight className="w-6 h-6 text-muted-foreground group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
 
@@ -442,13 +533,15 @@ const Workout = () => {
           </div>
         </div>
 
-        {/* Log Workout Button */}
+        {/* Log Workout Button - Enhanced */}
         <Button 
-          className="w-full h-14 text-lg font-bold rounded-full"
+          className="w-full h-16 text-lg font-bold rounded-full shadow-2xl hover:shadow-primary/50 transition-all duration-300 relative overflow-hidden group"
           size="lg"
           onClick={handleLogWorkout}
-          disabled={loading}
+          disabled={loading || !exercise}
         >
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+          <TrendingUp className="w-6 h-6 mr-2 group-hover:scale-110 transition-transform" />
           {loading ? "Logging..." : "Log Workout"}
         </Button>
       </div>

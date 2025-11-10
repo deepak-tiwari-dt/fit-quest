@@ -65,18 +65,21 @@ const Workout = () => {
       if (error) throw error;
 
       if (!challenge) {
+        // Get all exercises and select one based on the day
         const { data: exercises } = await supabase
           .from("exercises")
-          .select("*")
-          .limit(1)
-          .single();
+          .select("*");
 
-        if (exercises) {
+        if (exercises && exercises.length > 0) {
+          // Use day of year to deterministically select an exercise
+          const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+          const selectedExercise = exercises[dayOfYear % exercises.length];
+
           const { data: newChallenge, error: createError } = await supabase
             .from("daily_challenges")
             .insert({
               user_id: user?.id,
-              exercise_id: exercises.id,
+              exercise_id: selectedExercise.id,
               date: today,
             })
             .select(`
@@ -102,11 +105,6 @@ const Workout = () => {
   const selectExercise = (selectedExercise: any) => {
     setExercise(selectedExercise);
     setShowExerciseSelector(false);
-    setSets([
-      { id: 1, reps: 10 },
-      { id: 2, reps: 8 },
-      { id: 3, reps: 6 },
-    ]);
   };
 
   const updateReps = (id: number, delta: number) => {
@@ -281,7 +279,50 @@ const Workout = () => {
 
         {/* Sets Section */}
         <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4">Sets</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold">Sets</h3>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setSets([
+                  { id: 1, reps: 12 },
+                  { id: 2, reps: 10 },
+                  { id: 3, reps: 8 },
+                ])}
+                className="text-xs"
+              >
+                Light (12-10-8)
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setSets([
+                  { id: 1, reps: 10 },
+                  { id: 2, reps: 8 },
+                  { id: 3, reps: 6 },
+                  { id: 4, reps: 6 },
+                ])}
+                className="text-xs"
+              >
+                Standard (10-8-6-6)
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setSets([
+                  { id: 1, reps: 5 },
+                  { id: 2, reps: 5 },
+                  { id: 3, reps: 5 },
+                  { id: 4, reps: 5 },
+                  { id: 5, reps: 5 },
+                ])}
+                className="text-xs"
+              >
+                Heavy (5x5)
+              </Button>
+            </div>
+          </div>
           <div className="space-y-3">
             {sets.map((set, index) => (
               <div key={set.id} className="bg-secondary/30 rounded-2xl p-4 flex items-center justify-between">

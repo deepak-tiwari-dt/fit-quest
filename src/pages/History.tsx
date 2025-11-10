@@ -2,14 +2,18 @@ import { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, TrendingUp, Dumbbell, Trophy } from "lucide-react";
-import { format } from "date-fns";
-import { Card, CardContent } from "@/components/ui/card";
+import { Calendar, TrendingUp, Dumbbell, Trophy, Award, Flame } from "lucide-react";
+import { format, isToday, isYesterday, startOfWeek, endOfWeek } from "date-fns";
 
 const History = () => {
   const { user } = useAuth();
   const [workouts, setWorkouts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    thisWeek: 0,
+    totalSets: 0,
+    totalXp: 0,
+  });
 
   useEffect(() => {
     if (user) {
@@ -29,10 +33,29 @@ const History = () => {
         `)
         .eq("user_id", user?.id)
         .order("completed_at", { ascending: false })
-        .limit(20);
+        .limit(50);
 
       if (error) throw error;
-      setWorkouts(data || []);
+      
+      const workoutData = data || [];
+      setWorkouts(workoutData);
+
+      // Calculate stats
+      const weekStart = startOfWeek(new Date());
+      const weekEnd = endOfWeek(new Date());
+      const thisWeekWorkouts = workoutData.filter(w => {
+        const workoutDate = new Date(w.completed_at);
+        return workoutDate >= weekStart && workoutDate <= weekEnd;
+      });
+
+      const totalSets = workoutData.reduce((acc, w) => acc + (Array.isArray(w.sets) ? w.sets.length : 0), 0);
+      const totalXp = workoutData.reduce((acc, w) => acc + (w.total_xp_earned || 0), 0);
+
+      setStats({
+        thisWeek: thisWeekWorkouts.length,
+        totalSets,
+        totalXp,
+      });
     } catch (error: any) {
       console.error("Error fetching workouts:", error);
     } finally {
@@ -40,13 +63,33 @@ const History = () => {
     }
   };
 
+  const getDateLabel = (date: Date) => {
+    if (isToday(date)) return "Today";
+    if (isYesterday(date)) return "Yesterday";
+    return format(date, "EEEE, MMM dd");
+  };
+
+  const groupWorkoutsByDate = () => {
+    const grouped: { [key: string]: any[] } = {};
+    workouts.forEach(workout => {
+      const dateKey = format(new Date(workout.completed_at), "yyyy-MM-dd");
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(workout);
+    });
+    return grouped;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <div className="container mx-auto px-4 py-8 max-w-2xl">
-          <h1 className="text-3xl font-bold mb-6">Workout History</h1>
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-pulse text-primary text-lg">Loading your workouts...</div>
+        <div className="p-6">
+          <div className="flex items-center justify-center py-20">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+              <p className="text-muted-foreground">Loading history...</p>
+            </div>
           </div>
         </div>
         <BottomNav active="history" />
@@ -54,76 +97,124 @@ const History = () => {
     );
   }
 
+  const groupedWorkouts = groupWorkoutsByDate();
+
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Workout History</h1>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="w-5 h-5" />
-            <span className="text-sm">{workouts.length} workouts</span>
-          </div>
+      <div className="p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Workout History</h1>
+          <p className="text-muted-foreground">Track your fitness journey</p>
         </div>
 
+        {/* Stats Grid */}
+        {workouts.length > 0 && (
+          <div className="grid grid-cols-3 gap-3 mb-8">
+            <div className="bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl p-4 border border-primary/20">
+              <div className="flex items-center justify-center mb-2">
+                <Flame className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold">{stats.thisWeek}</p>
+                <p className="text-xs text-muted-foreground mt-1">This Week</p>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-secondary/30 to-secondary/20 rounded-2xl p-4 border border-border">
+              <div className="flex items-center justify-center mb-2">
+                <TrendingUp className="w-5 h-5 text-foreground" />
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold">{stats.totalSets}</p>
+                <p className="text-xs text-muted-foreground mt-1">Total Sets</p>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-700/10 rounded-2xl p-4 border border-yellow-600/20">
+              <div className="flex items-center justify-center mb-2">
+                <Award className="w-5 h-5 text-yellow-400" />
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold">{stats.totalXp}</p>
+                <p className="text-xs text-muted-foreground mt-1">Total XP</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Workout History */}
         {workouts.length === 0 ? (
-          <Card className="bg-secondary/20 border-2 border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Dumbbell className="w-16 h-16 text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No Workouts Yet</h3>
-              <p className="text-muted-foreground text-center">
-                Start your first workout to see your history here!
-              </p>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="bg-secondary/30 rounded-full p-8 mb-6">
+              <Dumbbell className="w-16 h-16 text-muted-foreground" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">No Workouts Yet</h3>
+            <p className="text-muted-foreground text-center max-w-sm">
+              Start your fitness journey today! Your workout history will appear here.
+            </p>
+          </div>
         ) : (
-          <div className="space-y-4">
-            {workouts.map((workout) => (
-              <Card key={workout.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Dumbbell className="w-5 h-5 text-primary" />
-                        <h3 className="text-xl font-bold">
-                          {workout.exercises?.name || "Unknown Exercise"}
-                        </h3>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="w-4 h-4" />
-                        <span>
-                          {format(new Date(workout.completed_at), "MMM dd, yyyy 'at' h:mm a")}
-                        </span>
-                      </div>
+          <div className="space-y-6">
+            {Object.entries(groupedWorkouts).map(([dateKey, dayWorkouts]) => {
+              const date = new Date(dateKey);
+              return (
+                <div key={dateKey}>
+                  {/* Date Header */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-2 bg-secondary/30 rounded-full px-4 py-2">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-semibold">{getDateLabel(date)}</span>
                     </div>
-                    <div className="flex items-center gap-2 bg-primary/10 rounded-full px-3 py-1">
-                      <Trophy className="w-4 h-4 text-primary" />
-                      <span className="font-bold text-primary">{workout.total_xp_earned} XP</span>
-                    </div>
+                    <div className="h-px bg-border flex-1" />
                   </div>
 
-                  <div className="border-t pt-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm font-semibold text-muted-foreground">
-                        Sets Completed
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-4 gap-2">
-                      {Array.isArray(workout.sets) && workout.sets.map((set: any, index: number) => (
-                        <div
-                          key={set.id || index}
-                          className="bg-secondary rounded-lg p-2 text-center"
-                        >
-                          <div className="text-xs text-muted-foreground">Set {index + 1}</div>
-                          <div className="text-lg font-bold">{set.reps}</div>
-                          <div className="text-xs text-muted-foreground">reps</div>
+                  {/* Workouts for this date */}
+                  <div className="space-y-3">
+                    {dayWorkouts.map((workout) => (
+                      <div
+                        key={workout.id}
+                        className="bg-secondary/20 rounded-2xl p-5 border border-border hover:border-primary/30 transition-all hover:bg-secondary/30"
+                      >
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="bg-primary/20 text-primary rounded-full p-2">
+                                <Dumbbell className="w-4 h-4" />
+                              </div>
+                              <h3 className="text-lg font-bold">
+                                {workout.exercises?.name || "Unknown Exercise"}
+                              </h3>
+                            </div>
+                            <p className="text-sm text-muted-foreground ml-10">
+                              {format(new Date(workout.completed_at), "h:mm a")}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 bg-primary/10 rounded-full px-3 py-1.5">
+                            <Trophy className="w-4 h-4 text-primary" />
+                            <span className="font-bold text-primary text-sm">+{workout.total_xp_earned}</span>
+                          </div>
                         </div>
-                      ))}
-                    </div>
+
+                        {/* Sets Display */}
+                        <div className="flex flex-wrap gap-2">
+                          {Array.isArray(workout.sets) && workout.sets.map((set: any, index: number) => (
+                            <div
+                              key={set.id || index}
+                              className="bg-background/50 rounded-lg px-3 py-2 border border-border"
+                            >
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs text-muted-foreground">Set {index + 1}:</span>
+                                <span className="text-sm font-bold">{set.reps}</span>
+                                <span className="text-xs text-muted-foreground">reps</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

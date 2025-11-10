@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Workout from "./pages/Workout";
 import History from "./pages/History";
+import Analytics from "./pages/Analytics";
 import InviteFriends from "./pages/InviteFriends";
 import Auth from "./pages/Auth";
 import Install from "./pages/Install";
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/workout" element={<ProtectedRoute><Workout /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/invite" element={<ProtectedRoute><InviteFriends /></ProtectedRoute>} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/install" element={<Install />} />

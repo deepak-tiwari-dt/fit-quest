@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, TrendingUp, Dumbbell, Trophy, Award, Flame } from "lucide-react";
+import { Calendar, TrendingUp, Dumbbell, Trophy, Award, Flame, BarChart3 } from "lucide-react";
 import { format, isToday, isYesterday, startOfWeek, endOfWeek } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const History = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [workouts, setWorkouts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,8 +106,18 @@ const History = () => {
       <div className="p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Workout History</h1>
-          <p className="text-muted-foreground">Track your fitness journey</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Workout History</h1>
+              <p className="text-muted-foreground">Track your fitness journey</p>
+            </div>
+            <button
+              onClick={() => navigate('/analytics')}
+              className="bg-primary/10 hover:bg-primary/20 text-primary rounded-full p-3 transition-colors"
+            >
+              <BarChart3 className="w-6 h-6" />
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}

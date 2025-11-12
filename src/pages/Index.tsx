@@ -178,32 +178,32 @@ const Index = () => {
 
           {/* Daily Challenge - Enhanced */}
           {dailyChallenge && (
-            <div className="relative overflow-hidden bg-gradient-to-br from-yellow-600/30 via-yellow-600/20 to-yellow-700/10 border-2 border-yellow-600/40 rounded-3xl p-6 mb-6 animate-fade-in shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="absolute top-0 left-0 w-24 h-24 bg-yellow-400/20 rounded-full blur-2xl" />
+            <div className="relative overflow-hidden bg-gradient-to-br from-accent/20 via-accent/15 to-accent/10 border-2 border-accent/30 rounded-3xl p-6 mb-6 animate-fade-in shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="absolute top-0 left-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl" />
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="bg-yellow-600/40 rounded-2xl p-3 shadow-lg">
-                      <Target className="w-7 h-7 text-yellow-300" />
+                    <div className="bg-accent/30 rounded-2xl p-3 shadow-lg">
+                      <Target className="w-7 h-7 text-accent" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-yellow-300 mb-1">Daily Challenge</h3>
+                      <h3 className="text-xl font-bold text-accent mb-1">Daily Challenge</h3>
                       <p className="text-sm text-foreground/90 font-medium">{dailyChallenge.exercises?.name}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 bg-yellow-600/40 px-4 py-2 rounded-full shadow-md">
-                    <Zap className="w-5 h-5 text-yellow-300" />
-                    <span className="text-yellow-300 font-bold text-lg">{dailyChallenge.xp_reward}</span>
+                  <div className="flex items-center gap-1 bg-accent/30 px-4 py-2 rounded-full shadow-md">
+                    <Zap className="w-5 h-5 text-accent" />
+                    <span className="text-accent font-bold text-lg">{dailyChallenge.xp_reward}</span>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Progress 
                     value={(dailyChallenge.completed_sets / dailyChallenge.target_sets) * 100} 
-                    className="h-3 bg-yellow-900/30"
+                    className="h-3 bg-accent/10"
                   />
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-foreground/70">Complete {dailyChallenge.target_sets} sets</span>
-                    <span className="font-bold text-yellow-300">
+                    <span className="text-muted-foreground">Complete {dailyChallenge.target_sets} sets</span>
+                    <span className="font-bold text-accent">
                       {dailyChallenge.completed_sets}/{dailyChallenge.target_sets} Sets
                     </span>
                   </div>
@@ -214,8 +214,8 @@ const Index = () => {
 
           {/* Quick Stats Grid - Enhanced */}
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="group relative overflow-hidden bg-gradient-to-br from-secondary/40 to-secondary/20 rounded-2xl p-5 animate-fade-in border border-border hover:border-primary/40 transition-all duration-300 shadow-md hover:shadow-lg">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors" />
+            <div className="group relative overflow-hidden bg-gradient-to-br from-card/80 to-card/40 rounded-2xl p-5 animate-fade-in border border-border hover:border-primary/50 transition-all duration-300 shadow-md hover:shadow-lg">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-colors" />
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="bg-primary/20 rounded-full p-2.5 group-hover:scale-110 transition-transform">
@@ -228,18 +228,19 @@ const Index = () => {
               </div>
             </div>
             
-            <div className="group relative overflow-hidden bg-gradient-to-br from-secondary/40 to-secondary/20 rounded-2xl p-5 animate-fade-in border border-border hover:border-primary/40 transition-all duration-300 shadow-md hover:shadow-lg">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-orange-500/5 rounded-full blur-xl group-hover:bg-orange-500/10 transition-colors" />
+            <div className="group relative overflow-hidden bg-gradient-to-br from-card/80 to-card/40 rounded-2xl p-5 animate-fade-in border border-border hover:border-accent/50 transition-all duration-300 shadow-md hover:shadow-lg">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-accent/10 rounded-full blur-2xl group-hover:bg-accent/20 transition-colors" />
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="bg-orange-500/20 rounded-full p-2.5 group-hover:scale-110 transition-transform">
-                    <TrendingUp className="w-5 h-5 text-orange-500" />
+                  <div className="bg-accent/20 rounded-full p-2.5 group-hover:scale-110 transition-transform">
+                    <TrendingUp className="w-5 h-5 text-accent" />
                   </div>
                   <span className="text-sm text-muted-foreground font-medium">Streak</span>
                 </div>
-                <p className="text-4xl font-bold group-hover:scale-105 transition-transform">
-                  {profile.weekly_streak} <span className="text-2xl">🔥</span>
-                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-bold group-hover:scale-105 transition-transform">{profile.weekly_streak}</p>
+                  <span className="text-2xl">🔥</span>
+                </div>
                 <p className="text-xs text-muted-foreground mt-1">Week streak</p>
               </div>
             </div>
@@ -252,7 +253,7 @@ const Index = () => {
                 <h3 className="text-xl font-bold">Recent Activity</h3>
                 <button 
                   onClick={() => navigate('/history')}
-                  className="text-sm text-primary font-semibold hover:underline flex items-center gap-1"
+                  className="text-sm text-primary font-semibold hover:text-primary/80 flex items-center gap-1 transition-colors"
                 >
                   View All
                   <ChevronRight className="w-4 h-4" />
@@ -262,11 +263,11 @@ const Index = () => {
                 {recentWorkouts.map((workout, idx) => (
                   <div
                     key={workout.id}
-                    className="group bg-gradient-to-r from-secondary/30 to-secondary/20 rounded-2xl p-4 flex items-center justify-between border border-border hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="group bg-gradient-to-r from-card/60 to-card/30 rounded-2xl p-4 flex items-center justify-between border border-border hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-md"
                     style={{ animationDelay: `${idx * 0.1}s` }}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="bg-primary/20 rounded-full p-3 group-hover:scale-110 transition-transform">
+                      <div className="bg-primary/20 rounded-full p-3 group-hover:scale-110 group-hover:bg-primary/30 transition-all">
                         <Dumbbell className="w-5 h-5 text-primary" />
                       </div>
                       <div>
@@ -274,9 +275,9 @@ const Index = () => {
                         <p className="text-xs text-muted-foreground">{workout.sets.length} sets completed</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 bg-green-500/20 px-3 py-1.5 rounded-full">
-                      <Zap className="w-4 h-4 text-green-400" />
-                      <span className="text-green-400 font-bold text-sm">+{workout.total_xp_earned}</span>
+                    <div className="flex items-center gap-1 bg-primary/20 px-3 py-1.5 rounded-full group-hover:bg-primary/30 transition-colors">
+                      <Zap className="w-4 h-4 text-primary" />
+                      <span className="text-primary font-bold text-sm">+{workout.total_xp_earned}</span>
                     </div>
                   </div>
                 ))}

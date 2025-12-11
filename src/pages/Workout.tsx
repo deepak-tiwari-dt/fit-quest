@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Plus, Minus, TrendingUp, ChevronRight, Timer, Search, Dumbbell, Zap } from "lucide-react";
+import { X, Plus, Minus, TrendingUp, ChevronRight, Timer, Search, Dumbbell, Zap, Bike, Footprints, Waves, Mountain, Music, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -9,6 +9,30 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { WorkoutTimer } from "@/components/WorkoutTimer";
+
+// Helper function to get exercise icon based on name
+const getExerciseIcon = (name: string) => {
+  const lowerName = name.toLowerCase();
+  if (lowerName.includes('walk') || lowerName.includes('run') || lowerName.includes('jog') || lowerName.includes('sprint') || lowerName.includes('stair')) {
+    return Footprints;
+  }
+  if (lowerName.includes('cycling') || lowerName.includes('bike') || lowerName.includes('spin')) {
+    return Bike;
+  }
+  if (lowerName.includes('swim') || lowerName.includes('water') || lowerName.includes('kayak') || lowerName.includes('paddle') || lowerName.includes('row')) {
+    return Waves;
+  }
+  if (lowerName.includes('hik') || lowerName.includes('climb') || lowerName.includes('trail') || lowerName.includes('ski') || lowerName.includes('snow')) {
+    return Mountain;
+  }
+  if (lowerName.includes('yoga') || lowerName.includes('pilates') || lowerName.includes('tai chi') || lowerName.includes('stretch') || lowerName.includes('qigong')) {
+    return Heart;
+  }
+  if (lowerName.includes('dance') || lowerName.includes('zumba') || lowerName.includes('aerobic') || lowerName.includes('ballet') || lowerName.includes('hip hop')) {
+    return Music;
+  }
+  return Dumbbell;
+};
 
 const Workout = () => {
   const navigate = useNavigate();
@@ -274,32 +298,35 @@ const Workout = () => {
                   <p className="text-muted-foreground">No exercises found</p>
                 </div>
               ) : (
-                filteredExercises.map((ex, index) => (
-                  <button
-                    key={ex.id}
-                    onClick={() => {
-                      selectExercise(ex);
-                      setSearchQuery("");
-                    }}
-                    className="group w-full bg-gradient-to-r from-secondary/40 to-secondary/20 rounded-2xl p-5 flex items-center justify-between hover:from-secondary/60 hover:to-secondary/40 transition-all duration-300 border border-border hover:border-primary/50 shadow-sm hover:shadow-md animate-fade-in"
-                    style={{ animationDelay: `${index * 0.02}s` }}
-                  >
-                    <div className="text-left flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="bg-primary/20 rounded-lg p-2 group-hover:scale-110 transition-transform">
-                          <Dumbbell className="w-4 h-4 text-primary" />
+                filteredExercises.map((ex, index) => {
+                  const ExerciseIcon = getExerciseIcon(ex.name);
+                  return (
+                    <button
+                      key={ex.id}
+                      onClick={() => {
+                        selectExercise(ex);
+                        setSearchQuery("");
+                      }}
+                      className="group w-full bg-gradient-to-r from-card/80 to-card/40 rounded-2xl p-4 flex items-center justify-between hover:from-primary/20 hover:to-primary/10 transition-all duration-300 border border-border hover:border-primary/50 shadow-sm hover:shadow-lg animate-fade-in"
+                      style={{ animationDelay: `${Math.min(index * 0.02, 0.5)}s` }}
+                    >
+                      <div className="text-left flex-1 flex items-center gap-4">
+                        <div className="bg-primary/20 rounded-xl p-3 group-hover:scale-110 group-hover:bg-primary/30 transition-all">
+                          <ExerciseIcon className="w-5 h-5 text-primary" />
                         </div>
-                        <h3 className="font-bold text-lg">{ex.name}</h3>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-base">{ex.name}</h3>
+                          <p className="text-xs text-muted-foreground line-clamp-1">{ex.description}</p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Zap className="w-3 h-3 text-accent" />
+                            <p className="text-xs font-semibold text-accent">{ex.xp_per_set} XP/set</p>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground ml-10">{ex.description}</p>
-                      <div className="flex items-center gap-1 ml-10 mt-2">
-                        <Zap className="w-4 h-4 text-primary" />
-                        <p className="text-xs font-semibold text-primary">{ex.xp_per_set} XP per set</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-6 h-6 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-                  </button>
-                ))
+                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 group-hover:text-primary transition-all" />
+                    </button>
+                  );
+                })
               )}
             </div>
           </div>
@@ -307,18 +334,18 @@ const Workout = () => {
 
         {/* Daily Challenge Card - Enhanced */}
         {dailyChallenge && exercise?.id === dailyChallenge.exercise_id && (
-          <div className="relative overflow-hidden bg-gradient-to-br from-yellow-600/30 via-yellow-600/20 to-yellow-700/10 border-2 border-yellow-600/40 rounded-3xl p-6 mb-8 animate-fade-in shadow-lg">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-400/20 rounded-full blur-2xl" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-accent/30 via-accent/20 to-accent/10 border-2 border-accent/40 rounded-3xl p-6 mb-8 animate-fade-in shadow-lg">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-accent/20 rounded-full blur-2xl" />
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="bg-yellow-600/40 rounded-2xl p-3">
-                    <Zap className="w-6 h-6 text-yellow-300" />
+                  <div className="bg-accent/40 rounded-2xl p-3">
+                    <Zap className="w-6 h-6 text-accent" />
                   </div>
-                  <h2 className="text-yellow-300 text-xl font-bold">Daily Challenge</h2>
+                  <h2 className="text-accent text-xl font-bold">Daily Challenge</h2>
                 </div>
-                <div className="bg-yellow-600/40 px-4 py-2 rounded-full">
-                  <span className="text-yellow-300 font-bold text-lg">+{dailyChallenge.xp_reward} XP</span>
+                <div className="bg-accent/40 px-4 py-2 rounded-full">
+                  <span className="text-accent-foreground font-bold text-lg">+{dailyChallenge.xp_reward} XP</span>
                 </div>
               </div>
               <p className="text-foreground/90 mb-4 font-medium">
@@ -327,11 +354,11 @@ const Workout = () => {
               <div className="space-y-2">
                 <Progress 
                   value={(dailyChallenge.completed_sets / dailyChallenge.target_sets) * 100} 
-                  className="h-3 bg-yellow-900/30"
+                  className="h-3 bg-accent/20"
                 />
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-foreground/70">Progress</span>
-                  <span className="text-sm font-bold text-yellow-300">
+                  <span className="text-sm font-bold text-accent">
                     {dailyChallenge.completed_sets}/{dailyChallenge.target_sets} Sets
                   </span>
                 </div>
@@ -343,36 +370,41 @@ const Workout = () => {
         {/* Exercise Section - Enhanced */}
         <div className="mb-8 animate-fade-in">
           <h3 className="text-xl font-bold mb-4">Exercise</h3>
-          <button
-            onClick={() => setShowExerciseSelector(true)}
-            className="group w-full bg-gradient-to-r from-secondary/40 to-secondary/20 rounded-2xl p-5 flex items-center justify-between hover:from-secondary/60 hover:to-secondary/40 transition-all duration-300 border border-border hover:border-primary/50 shadow-sm hover:shadow-md"
-          >
-            <div className="text-left flex-1">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="bg-primary/20 rounded-lg p-2 group-hover:scale-110 transition-transform">
-                  <Dumbbell className="w-5 h-5 text-primary" />
+          {(() => {
+            const ExerciseIcon = exercise ? getExerciseIcon(exercise.name) : Dumbbell;
+            return (
+              <button
+                onClick={() => setShowExerciseSelector(true)}
+                className="group w-full bg-gradient-to-r from-card/80 to-card/40 rounded-2xl p-5 flex items-center justify-between hover:from-primary/20 hover:to-primary/10 transition-all duration-300 border border-border hover:border-primary/50 shadow-sm hover:shadow-lg"
+              >
+                <div className="text-left flex-1 flex items-center gap-4">
+                  <div className="bg-primary/20 rounded-xl p-3 group-hover:scale-110 group-hover:bg-primary/30 transition-all">
+                    <ExerciseIcon className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold">{exercise?.name || "Select Exercise"}</p>
+                    {exercise?.description && (
+                      <p className="text-sm text-muted-foreground">{exercise.description}</p>
+                    )}
+                    {exercise?.xp_per_set && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <Zap className="w-4 h-4 text-accent" />
+                        <p className="text-xs font-semibold text-accent">{exercise.xp_per_set} XP per set</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <p className="text-lg font-bold">{exercise?.name || "Select Exercise"}</p>
-              </div>
-              {exercise?.description && (
-                <p className="text-sm text-muted-foreground ml-11">{exercise.description}</p>
-              )}
-              {exercise?.xp_per_set && (
-                <div className="flex items-center gap-1 ml-11 mt-2">
-                  <Zap className="w-4 h-4 text-primary" />
-                  <p className="text-xs font-semibold text-primary">{exercise.xp_per_set} XP per set</p>
-                </div>
-              )}
-            </div>
-            <ChevronRight className="w-6 h-6 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-          </button>
+                <ChevronRight className="w-6 h-6 text-muted-foreground group-hover:translate-x-1 group-hover:text-primary transition-all" />
+              </button>
+            );
+          })()}
         </div>
 
         {/* Sets Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-bold">Sets</h3>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap justify-end">
               <Button
                 size="sm"
                 variant="outline"
@@ -381,9 +413,9 @@ const Workout = () => {
                   { id: 2, reps: 10 },
                   { id: 3, reps: 8 },
                 ])}
-                className="text-xs"
+                className="text-xs rounded-full px-3 h-8 hover:bg-primary/20 hover:text-primary hover:border-primary/50"
               >
-                Light (12-10-8)
+                Light
               </Button>
               <Button
                 size="sm"
@@ -394,9 +426,9 @@ const Workout = () => {
                   { id: 3, reps: 6 },
                   { id: 4, reps: 6 },
                 ])}
-                className="text-xs"
+                className="text-xs rounded-full px-3 h-8 hover:bg-primary/20 hover:text-primary hover:border-primary/50"
               >
-                Standard (10-8-6-6)
+                Standard
               </Button>
               <Button
                 size="sm"
@@ -408,46 +440,50 @@ const Workout = () => {
                   { id: 4, reps: 5 },
                   { id: 5, reps: 5 },
                 ])}
-                className="text-xs"
+                className="text-xs rounded-full px-3 h-8 hover:bg-primary/20 hover:text-primary hover:border-primary/50"
               >
-                Heavy (5x5)
+                Heavy
               </Button>
             </div>
           </div>
           <div className="space-y-3">
             {sets.map((set, index) => (
-              <div key={set.id} className="bg-secondary/30 rounded-2xl p-4 flex items-center justify-between">
+              <div 
+                key={set.id} 
+                className="bg-gradient-to-r from-card/80 to-card/40 rounded-2xl p-4 flex items-center justify-between border border-border animate-fade-in"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
                 <div className="flex items-center gap-4">
-                  <div className="bg-primary/20 text-primary rounded-full w-12 h-12 flex items-center justify-center font-bold">
+                  <div className="bg-primary/20 text-primary rounded-xl w-12 h-12 flex items-center justify-center font-bold text-lg">
                     {index + 1}
                   </div>
-                  <span className="font-semibold">Reps</span>
+                  <span className="font-medium text-muted-foreground">Reps</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <Button
                     size="icon"
-                    variant="secondary"
-                    className="rounded-full w-10 h-10"
+                    variant="ghost"
+                    className="rounded-full w-9 h-9 hover:bg-primary/20 hover:text-primary"
                     onClick={() => updateReps(set.id, -1)}
                   >
-                    <Minus className="w-5 h-5" />
+                    <Minus className="w-4 h-4" />
                   </Button>
-                  <span className="text-2xl font-bold w-12 text-center">{set.reps}</span>
+                  <span className="text-2xl font-bold w-10 text-center">{set.reps}</span>
                   <Button
                     size="icon"
-                    variant="secondary"
-                    className="rounded-full w-10 h-10"
+                    variant="ghost"
+                    className="rounded-full w-9 h-9 hover:bg-primary/20 hover:text-primary"
                     onClick={() => updateReps(set.id, 1)}
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-4 h-4" />
                   </Button>
                   <Button
                     size="icon"
-                    variant="destructive"
-                    className="rounded-full w-10 h-10"
+                    variant="ghost"
+                    className="rounded-full w-9 h-9 hover:bg-destructive/20 hover:text-destructive ml-2"
                     onClick={() => removeSet(set.id)}
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
@@ -455,7 +491,7 @@ const Workout = () => {
             
             <button
               onClick={addSet}
-              className="w-full border-2 border-dashed border-primary/30 rounded-2xl p-6 flex items-center justify-center gap-2 text-primary hover:bg-primary/5 transition-colors"
+              className="w-full border-2 border-dashed border-primary/30 rounded-2xl p-5 flex items-center justify-center gap-2 text-primary hover:bg-primary/10 hover:border-primary/50 transition-all"
             >
               <Plus className="w-5 h-5" />
               <span className="font-semibold">Add Set</span>
@@ -522,13 +558,13 @@ const Workout = () => {
         </div>
 
         {/* XP Gain */}
-        <div className="bg-secondary/30 rounded-2xl p-6 mb-8">
-          <h3 className="text-xl font-bold mb-4">XP Gain</h3>
+        <div className="bg-gradient-to-r from-secondary/40 to-secondary/20 rounded-2xl p-6 mb-8 border border-border">
+          <h3 className="text-xl font-bold mb-4">Estimated XP</h3>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Estimated XP</span>
-            <div className="flex items-center gap-2 text-green-400">
+            <span className="text-muted-foreground">You'll earn</span>
+            <div className="flex items-center gap-2 text-primary">
               <TrendingUp className="w-5 h-5" />
-              <span className="text-2xl font-bold">{estimatedXp} XP</span>
+              <span className="text-2xl font-bold">+{estimatedXp} XP</span>
             </div>
           </div>
         </div>

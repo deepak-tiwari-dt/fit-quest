@@ -10,6 +10,7 @@ import { StatCard } from "@/components/StatCard";
 import { LeaderboardItem } from "@/components/LeaderboardItem";
 import { BottomNav } from "@/components/BottomNav";
 import { ImageCropDialog } from "@/components/ImageCropDialog";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -214,7 +215,7 @@ const Profile = () => {
             </SheetContent>
           </Sheet>
           <h1 className="text-2xl font-bold">Profile</h1>
-          <div className="w-12 h-12" />
+          <ThemeToggle />
         </div>
 
         {/* Profile Section */}

@@ -438,6 +438,7 @@ const Analytics = () => {
                         color: 'hsl(var(--foreground))',
                       }}
                       labelStyle={{ color: 'hsl(var(--foreground))' }}
+                      itemStyle={{ color: 'hsl(var(--foreground))' }}
                     />
                     <Legend 
                       wrapperStyle={{ fontSize: '11px' }}

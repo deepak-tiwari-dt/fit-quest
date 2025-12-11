@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { BottomNav } from "@/components/BottomNav";
 import { InstallBanner } from "@/components/InstallBanner";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -133,8 +134,11 @@ const Index = () => {
                 </h1>
                 <p className="text-lg text-muted-foreground">{profile.username}</p>
               </div>
-              <div className="bg-primary/10 rounded-full p-4 animate-pulse">
-                <Trophy className="w-8 h-8 text-primary" />
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                <div className="bg-primary/10 rounded-full p-4 animate-pulse">
+                  <Trophy className="w-8 h-8 text-primary" />
+                </div>
               </div>
             </div>
           </div>

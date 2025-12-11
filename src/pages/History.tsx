@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
+import { WorkoutCalendar } from "@/components/WorkoutCalendar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, TrendingUp, Dumbbell, Trophy, Award, Flame, BarChart3 } from "lucide-react";
@@ -152,6 +153,9 @@ const History = () => {
             </div>
           </div>
         )}
+
+        {/* Workout Calendar */}
+        {workouts.length > 0 && <WorkoutCalendar workouts={workouts} />}
 
         {/* Workout History */}
         {workouts.length === 0 ? (

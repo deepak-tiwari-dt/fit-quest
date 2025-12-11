@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Award, Target, Flame, Calendar, Zap, Activity, Trophy } from "lucide-react";
+import { 
+  TrendingUp, Award, Target, Flame, Calendar, Zap, Activity, Trophy,
+  Dumbbell, Footprints, Bike, Waves, Mountain, Heart, Music, PersonStanding,
+  Timer, BarChart3
+} from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -21,6 +21,33 @@ import {
   Area,
   AreaChart,
 } from "recharts";
+
+// Helper function to get exercise icon
+const getExerciseIcon = (exerciseName: string) => {
+  const name = exerciseName.toLowerCase();
+  if (name.includes('walk') || name.includes('run') || name.includes('jog') || name.includes('sprint')) {
+    return Footprints;
+  }
+  if (name.includes('cycl') || name.includes('bike')) {
+    return Bike;
+  }
+  if (name.includes('swim')) {
+    return Waves;
+  }
+  if (name.includes('hik') || name.includes('climb')) {
+    return Mountain;
+  }
+  if (name.includes('yoga') || name.includes('stretch') || name.includes('pilates')) {
+    return PersonStanding;
+  }
+  if (name.includes('cardio') || name.includes('aerobic') || name.includes('jump')) {
+    return Heart;
+  }
+  if (name.includes('danc') || name.includes('zumba')) {
+    return Music;
+  }
+  return Dumbbell;
+};
 
 const Analytics = () => {
   const { user } = useAuth();
@@ -311,7 +338,7 @@ const Analytics = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Favorite Exercises */}
+            {/* Favorite Exercises - Card Based */}
             <div className="bg-card rounded-2xl p-5 border border-border animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <div className="flex items-center gap-2 mb-5">
                 <div className="p-2 rounded-lg bg-accent/20">
@@ -319,42 +346,60 @@ const Analytics = () => {
                 </div>
                 <h2 className="text-lg font-bold text-foreground">Favorite Exercises</h2>
               </div>
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={exerciseData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} horizontal={false} />
-                  <XAxis 
-                    type="number"
-                    stroke="hsl(var(--muted-foreground))"
-                    style={{ fontSize: '10px' }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis 
-                    type="category"
-                    dataKey="name" 
-                    stroke="hsl(var(--muted-foreground))"
-                    style={{ fontSize: '10px' }}
-                    width={80}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '12px',
-                      color: 'hsl(var(--foreground))',
-                    }}
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
-                    cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
-                  />
-                  <Bar dataKey="count" name="Workouts" radius={[0, 8, 8, 0]}>
-                    {exerciseData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="space-y-3">
+                {exerciseData.map((exercise, index) => {
+                  const ExerciseIcon = getExerciseIcon(exercise.name);
+                  const maxCount = Math.max(...exerciseData.map(e => e.count));
+                  const percentage = (exercise.count / maxCount) * 100;
+                  
+                  return (
+                    <div
+                      key={index}
+                      className="bg-gradient-to-r from-secondary/50 to-transparent rounded-xl p-4 border border-border hover:border-primary/30 transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="p-2.5 rounded-xl"
+                          style={{ backgroundColor: `${COLORS[index % COLORS.length]}20` }}
+                        >
+                          <ExerciseIcon 
+                            className="w-5 h-5" 
+                            style={{ color: COLORS[index % COLORS.length] }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <h3 className="font-semibold text-foreground truncate">{exercise.name}</h3>
+                            <div className="flex items-center gap-2 ml-2">
+                              <span className="text-sm font-bold text-primary">{exercise.count}</span>
+                              <span className="text-xs text-muted-foreground">workouts</span>
+                            </div>
+                          </div>
+                          <div className="w-full bg-secondary/50 rounded-full h-2 overflow-hidden">
+                            <div 
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{ 
+                                width: `${percentage}%`,
+                                backgroundColor: COLORS[index % COLORS.length]
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Zap className="w-3 h-3 text-accent" />
+                              <span>{exercise.totalXp} XP</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <BarChart3 className="w-3 h-3 text-primary" />
+                              <span>{exercise.totalSets} sets</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Exercise Distribution */}

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Award, Target, Flame, Calendar } from "lucide-react";
+import { TrendingUp, Award, Target, Flame, Calendar, Zap, Activity, Trophy } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import {
   LineChart,
@@ -18,6 +18,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  Area,
+  AreaChart,
 } from "recharts";
 
 const Analytics = () => {
@@ -27,6 +29,7 @@ const Analytics = () => {
   const [progressData, setProgressData] = useState<any[]>([]);
   const [exerciseData, setExerciseData] = useState<any[]>([]);
   const [personalRecords, setPersonalRecords] = useState<any[]>([]);
+  const [totalStats, setTotalStats] = useState({ workouts: 0, xp: 0, sets: 0 });
 
   useEffect(() => {
     if (user) {
@@ -38,7 +41,6 @@ const Analytics = () => {
 
   const fetchAnalytics = async () => {
     try {
-      // Fetch all workouts
       const { data: workoutsData, error } = await supabase
         .from("workouts")
         .select(`
@@ -52,6 +54,11 @@ const Analytics = () => {
 
       const workoutsList = workoutsData || [];
       setWorkouts(workoutsList);
+
+      // Calculate total stats
+      const totalXp = workoutsList.reduce((sum, w) => sum + (w.total_xp_earned || 0), 0);
+      const totalSets = workoutsList.reduce((sum, w) => sum + (Array.isArray(w.sets) ? w.sets.length : 0), 0);
+      setTotalStats({ workouts: workoutsList.length, xp: totalXp, sets: totalSets });
 
       // Process progress over time (last 30 days)
       const last30Days = Array.from({ length: 30 }, (_, i) => {
@@ -105,7 +112,6 @@ const Analytics = () => {
       exerciseMap.forEach((stats, exerciseId) => {
         const exerciseWorkouts = workoutsList.filter(w => w.exercises?.id === exerciseId);
         
-        // Find max reps in a single set
         let maxReps = 0;
         let maxRepsDate = null;
         exerciseWorkouts.forEach(workout => {
@@ -119,7 +125,6 @@ const Analytics = () => {
           }
         });
 
-        // Find max sets in a workout
         let maxSets = 0;
         let maxSetsDate = null;
         exerciseWorkouts.forEach(workout => {
@@ -162,7 +167,7 @@ const Analytics = () => {
     "hsl(var(--chart-3))",
     "hsl(var(--chart-4))",
     "hsl(var(--chart-5))",
-    "hsl(var(--chart-1))",
+    "hsl(var(--accent))",
   ];
 
   if (loading) {
@@ -185,14 +190,21 @@ const Analytics = () => {
     <div className="min-h-screen bg-background pb-20">
       <div className="p-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Analytics</h1>
+        <div className="mb-8 animate-fade-in">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-xl bg-primary/20">
+              <Activity className="w-6 h-6 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Analytics
+            </h1>
+          </div>
           <p className="text-muted-foreground">Track your progress and achievements</p>
         </div>
 
         {workouts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="bg-secondary/30 rounded-full p-8 mb-6">
+          <div className="flex flex-col items-center justify-center py-16 animate-fade-in">
+            <div className="bg-card rounded-full p-8 mb-6 border border-border">
               <TrendingUp className="w-16 h-16 text-muted-foreground" />
             </div>
             <h3 className="text-xl font-bold mb-2">No Data Yet</h3>
@@ -201,80 +213,142 @@ const Analytics = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-8">
-            {/* Progress Over Time */}
-            <div className="bg-secondary/20 rounded-2xl p-6 border border-border">
-              <div className="flex items-center gap-2 mb-6">
-                <TrendingUp className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-bold">Progress Over Time</h2>
+          <div className="space-y-6">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-3 gap-3 animate-fade-in">
+              <div className="bg-card rounded-2xl p-4 border border-border text-center">
+                <div className="flex justify-center mb-2">
+                  <div className="p-2 rounded-lg bg-primary/20">
+                    <Target className="w-4 h-4 text-primary" />
+                  </div>
+                </div>
+                <p className="text-2xl font-bold text-foreground">{totalStats.workouts}</p>
+                <p className="text-xs text-muted-foreground">Workouts</p>
               </div>
-              <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={progressData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <div className="bg-card rounded-2xl p-4 border border-border text-center">
+                <div className="flex justify-center mb-2">
+                  <div className="p-2 rounded-lg bg-accent/20">
+                    <Zap className="w-4 h-4 text-accent" />
+                  </div>
+                </div>
+                <p className="text-2xl font-bold text-foreground">{totalStats.xp.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">Total XP</p>
+              </div>
+              <div className="bg-card rounded-2xl p-4 border border-border text-center">
+                <div className="flex justify-center mb-2">
+                  <div className="p-2 rounded-lg bg-primary/20">
+                    <Flame className="w-4 h-4 text-primary" />
+                  </div>
+                </div>
+                <p className="text-2xl font-bold text-foreground">{totalStats.sets}</p>
+                <p className="text-xs text-muted-foreground">Total Sets</p>
+              </div>
+            </div>
+
+            {/* Progress Over Time */}
+            <div className="bg-card rounded-2xl p-5 border border-border animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <div className="flex items-center gap-2 mb-5">
+                <div className="p-2 rounded-lg bg-primary/20">
+                  <TrendingUp className="w-4 h-4 text-primary" />
+                </div>
+                <h2 className="text-lg font-bold text-foreground">Progress Over Time</h2>
+              </div>
+              <ResponsiveContainer width="100%" height={220}>
+                <AreaChart data={progressData}>
+                  <defs>
+                    <linearGradient id="colorWorkouts" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
                   <XAxis 
                     dataKey="date" 
                     stroke="hsl(var(--muted-foreground))"
-                    style={{ fontSize: '12px' }}
+                    style={{ fontSize: '10px' }}
+                    tickLine={false}
+                    axisLine={false}
                   />
                   <YAxis 
                     stroke="hsl(var(--muted-foreground))"
-                    style={{ fontSize: '12px' }}
+                    style={{ fontSize: '10px' }}
+                    tickLine={false}
+                    axisLine={false}
                   />
                   <Tooltip 
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--background))',
+                      backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
+                      borderRadius: '12px',
+                      color: 'hsl(var(--foreground))',
                     }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
                   />
-                  <Legend />
-                  <Line 
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
+                  <Area 
                     type="monotone" 
                     dataKey="workouts" 
                     stroke="hsl(var(--primary))" 
                     strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorWorkouts)"
                     name="Workouts"
                   />
-                  <Line 
+                  <Area 
                     type="monotone" 
                     dataKey="xp" 
-                    stroke="hsl(var(--chart-2))" 
+                    stroke="hsl(var(--accent))" 
                     strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorXp)"
                     name="XP Earned"
                   />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             </div>
 
             {/* Favorite Exercises */}
-            <div className="bg-secondary/20 rounded-2xl p-6 border border-border">
-              <div className="flex items-center gap-2 mb-6">
-                <Flame className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-bold">Favorite Exercises</h2>
+            <div className="bg-card rounded-2xl p-5 border border-border animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <div className="flex items-center gap-2 mb-5">
+                <div className="p-2 rounded-lg bg-accent/20">
+                  <Flame className="w-4 h-4 text-accent" />
+                </div>
+                <h2 className="text-lg font-bold text-foreground">Favorite Exercises</h2>
               </div>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={exerciseData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={exerciseData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} horizontal={false} />
                   <XAxis 
-                    dataKey="name" 
+                    type="number"
                     stroke="hsl(var(--muted-foreground))"
-                    style={{ fontSize: '11px' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
+                    style={{ fontSize: '10px' }}
+                    tickLine={false}
+                    axisLine={false}
                   />
                   <YAxis 
+                    type="category"
+                    dataKey="name" 
                     stroke="hsl(var(--muted-foreground))"
-                    style={{ fontSize: '12px' }}
+                    style={{ fontSize: '10px' }}
+                    width={80}
+                    tickLine={false}
+                    axisLine={false}
                   />
                   <Tooltip 
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--background))',
+                      backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
+                      borderRadius: '12px',
+                      color: 'hsl(var(--foreground))',
                     }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
                   />
-                  <Bar dataKey="count" name="Workouts" radius={[8, 8, 0, 0]}>
+                  <Bar dataKey="count" name="Workouts" radius={[0, 8, 8, 0]}>
                     {exerciseData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -285,22 +359,27 @@ const Analytics = () => {
 
             {/* Exercise Distribution */}
             {exerciseData.length > 0 && (
-              <div className="bg-secondary/20 rounded-2xl p-6 border border-border">
-                <div className="flex items-center gap-2 mb-6">
-                  <Target className="w-5 h-5 text-primary" />
-                  <h2 className="text-xl font-bold">Exercise Distribution</h2>
+              <div className="bg-card rounded-2xl p-5 border border-border animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="p-2 rounded-lg bg-primary/20">
+                    <Target className="w-4 h-4 text-primary" />
+                  </div>
+                  <h2 className="text-lg font-bold text-foreground">Exercise Distribution</h2>
                 </div>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
                     <Pie
                       data={exerciseData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={100}
+                      label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                      outerRadius={90}
+                      innerRadius={50}
                       fill="#8884d8"
                       dataKey="count"
+                      strokeWidth={2}
+                      stroke="hsl(var(--card))"
                     >
                       {exerciseData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -308,10 +387,16 @@ const Analytics = () => {
                     </Pie>
                     <Tooltip 
                       contentStyle={{
-                        backgroundColor: 'hsl(var(--background))',
+                        backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
+                        borderRadius: '12px',
+                        color: 'hsl(var(--foreground))',
                       }}
+                      labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    />
+                    <Legend 
+                      wrapperStyle={{ fontSize: '11px' }}
+                      formatter={(value) => <span style={{ color: 'hsl(var(--foreground))' }}>{value}</span>}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -320,24 +405,26 @@ const Analytics = () => {
 
             {/* Personal Records */}
             {personalRecords.length > 0 && (
-              <div className="bg-secondary/20 rounded-2xl p-6 border border-border">
-                <div className="flex items-center gap-2 mb-6">
-                  <Award className="w-5 h-5 text-primary" />
-                  <h2 className="text-xl font-bold">Personal Records</h2>
+              <div className="bg-card rounded-2xl p-5 border border-border animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="p-2 rounded-lg bg-accent/20">
+                    <Trophy className="w-4 h-4 text-accent" />
+                  </div>
+                  <h2 className="text-lg font-bold text-foreground">Personal Records</h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {personalRecords.map((record, index) => (
                     <div
                       key={index}
-                      className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl p-4 border border-primary/20"
+                      className="bg-gradient-to-br from-primary/10 via-card to-accent/5 rounded-xl p-4 border border-border hover:border-primary/30 transition-all duration-300"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <p className="text-sm text-muted-foreground">{record.type}</p>
-                          <h3 className="font-bold text-lg">{record.exercise}</h3>
+                          <p className="text-xs text-muted-foreground font-medium">{record.type}</p>
+                          <h3 className="font-bold text-foreground truncate">{record.exercise}</h3>
                         </div>
-                        <div className="bg-primary/20 rounded-full px-3 py-1">
-                          <span className="text-2xl font-bold text-primary">{record.value}</span>
+                        <div className="bg-primary/20 rounded-xl px-3 py-1.5 ml-2">
+                          <span className="text-xl font-bold text-primary">{record.value}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">

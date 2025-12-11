@@ -1,0 +1,61 @@
+-- Add more cardio and outdoor exercises
+INSERT INTO exercises (name, description, xp_per_set) VALUES
+-- Cardio
+('Walking', 'Low-impact cardio for all fitness levels', 3),
+('Brisk Walking', 'Moderate pace walking for heart health', 4),
+('Power Walking', 'Fast-paced walking with arm movement', 5),
+('Jogging', 'Light running at a comfortable pace', 6),
+('Running', 'Moderate to fast paced running', 8),
+('Sprinting', 'High-intensity short distance running', 10),
+('Cycling', 'Outdoor or stationary bike riding', 6),
+('Mountain Biking', 'Off-road cycling on trails', 8),
+('Stationary Bike', 'Indoor cycling workout', 5),
+('Spin Class', 'High-intensity indoor cycling', 8),
+-- Swimming
+('Swimming Freestyle', 'Front crawl swimming stroke', 8),
+('Swimming Breaststroke', 'Relaxed swimming technique', 6),
+('Swimming Backstroke', 'Back swimming for spine health', 6),
+('Swimming Butterfly', 'Advanced high-intensity stroke', 10),
+('Water Aerobics', 'Low-impact pool exercises', 5),
+-- Outdoor Activities
+('Hiking', 'Trail walking with elevation changes', 7),
+('Trail Running', 'Running on natural terrain', 9),
+('Rock Climbing', 'Indoor or outdoor climbing', 10),
+('Kayaking', 'Paddling workout for upper body', 7),
+('Rowing', 'Full body cardio on water or machine', 8),
+('Stand-Up Paddleboarding', 'Balance and core workout on water', 6),
+('Cross-Country Skiing', 'Full body winter cardio', 9),
+('Snowshoeing', 'Winter hiking with snowshoes', 7),
+-- Flexibility & Mind-Body
+('Yoga Flow', 'Dynamic flowing yoga sequences', 4),
+('Power Yoga', 'Strength-focused yoga practice', 6),
+('Hot Yoga', 'Yoga in heated room', 7),
+('Pilates', 'Core-focused controlled movements', 5),
+('Pilates Reformer', 'Machine-assisted pilates', 6),
+('Tai Chi', 'Slow meditative martial art', 4),
+('Qigong', 'Chinese breathing exercises', 3),
+('Stretching Routine', 'Full body flexibility work', 3),
+('Foam Rolling', 'Self-myofascial release', 2),
+-- Dance & Aerobics
+('Zumba', 'Latin-inspired dance fitness', 7),
+('Hip Hop Dance', 'Urban dance workout', 7),
+('Ballet Fitness', 'Ballet-inspired toning', 6),
+('Aerobics', 'Classic cardio dance moves', 6),
+('Step Aerobics', 'Platform-based cardio', 7),
+('Kickboxing', 'Martial arts cardio workout', 8),
+('Boxing', 'Punch combinations and footwork', 8),
+-- Sports Training
+('Basketball Drills', 'Court movement and shooting', 7),
+('Soccer Drills', 'Ball control and agility', 7),
+('Tennis Practice', 'Racket sport conditioning', 7),
+('Golf Swing Practice', 'Core rotation and balance', 4),
+('Volleyball Drills', 'Jumping and hitting practice', 6),
+('Badminton', 'Fast-paced racket sport', 6),
+-- Home Workouts
+('Stair Climbing', 'Using stairs for cardio', 6),
+('Jump Rope', 'Classic cardio with coordination', 7),
+('Shadow Boxing', 'Boxing without equipment', 5),
+('Bodyweight Circuit', 'No equipment full body', 6),
+('Tabata Training', '20 sec work, 10 sec rest intervals', 8),
+('EMOM Workout', 'Every minute on the minute training', 7)
+ON CONFLICT DO NOTHING;

@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { BottomNav } from "@/components/BottomNav";
 import { InstallBanner } from "@/components/InstallBanner";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { WeeklyGoal } from "@/components/WeeklyGoal";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -215,6 +216,11 @@ const Index = () => {
               </div>
             </div>
           )}
+
+          {/* Weekly Goal */}
+          <div className="mb-6">
+            <WeeklyGoal workouts={recentWorkouts} />
+          </div>
 
           {/* Quick Stats Grid - Enhanced */}
           <div className="grid grid-cols-2 gap-4 mb-6">

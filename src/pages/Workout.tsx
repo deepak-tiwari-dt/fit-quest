@@ -48,10 +48,49 @@ const Workout = () => {
   const [allExercises, setAllExercises] = useState<any[]>([]);
   const [filteredExercises, setFilteredExercises] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
   const [showRestTimer, setShowRestTimer] = useState(false);
   const [showWorkoutTimer, setShowWorkoutTimer] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const categories = [
+    { name: "All", icon: Dumbbell },
+    { name: "Cardio", icon: Footprints },
+    { name: "Strength", icon: Dumbbell },
+    { name: "Flexibility", icon: Heart },
+    { name: "Sports", icon: Bike },
+  ];
+
+  const getExerciseCategory = (name: string): string => {
+    const lowerName = name.toLowerCase();
+    // Cardio exercises
+    if (lowerName.includes('walk') || lowerName.includes('run') || lowerName.includes('jog') || 
+        lowerName.includes('sprint') || lowerName.includes('cycling') || lowerName.includes('bike') ||
+        lowerName.includes('swim') || lowerName.includes('jump') || lowerName.includes('aerobic') ||
+        lowerName.includes('cardio') || lowerName.includes('hiit') || lowerName.includes('dance') ||
+        lowerName.includes('zumba') || lowerName.includes('stair') || lowerName.includes('skip') ||
+        lowerName.includes('rope')) {
+      return "Cardio";
+    }
+    // Flexibility exercises
+    if (lowerName.includes('yoga') || lowerName.includes('pilates') || lowerName.includes('stretch') ||
+        lowerName.includes('tai chi') || lowerName.includes('qigong') || lowerName.includes('flexibility') ||
+        lowerName.includes('mobility')) {
+      return "Flexibility";
+    }
+    // Sports exercises
+    if (lowerName.includes('basketball') || lowerName.includes('soccer') || lowerName.includes('football') ||
+        lowerName.includes('tennis') || lowerName.includes('golf') || lowerName.includes('hockey') ||
+        lowerName.includes('volleyball') || lowerName.includes('baseball') || lowerName.includes('martial') ||
+        lowerName.includes('boxing') || lowerName.includes('kickbox') || lowerName.includes('hik') ||
+        lowerName.includes('climb') || lowerName.includes('ski') || lowerName.includes('snowboard') ||
+        lowerName.includes('surf') || lowerName.includes('kayak') || lowerName.includes('row')) {
+      return "Sports";
+    }
+    // Default to Strength
+    return "Strength";
+  };
 
   useEffect(() => {
     if (user) {
@@ -77,16 +116,23 @@ const Workout = () => {
   };
 
   useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setFilteredExercises(allExercises);
-    } else {
-      const filtered = allExercises.filter(ex =>
+    let filtered = allExercises;
+    
+    // Filter by category
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter(ex => getExerciseCategory(ex.name) === selectedCategory);
+    }
+    
+    // Filter by search query
+    if (searchQuery.trim() !== "") {
+      filtered = filtered.filter(ex =>
         ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ex.description?.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      setFilteredExercises(filtered);
     }
-  }, [searchQuery, allExercises]);
+    
+    setFilteredExercises(filtered);
+  }, [searchQuery, selectedCategory, allExercises]);
 
   const fetchDailyChallenge = async () => {
     try {
@@ -271,6 +317,7 @@ const Workout = () => {
                 onClick={() => {
                   setShowExerciseSelector(false);
                   setSearchQuery("");
+                  setSelectedCategory("All");
                 }}
                 className="bg-secondary/30 hover:bg-secondary/50 rounded-full p-3 transition-all"
               >
@@ -279,7 +326,7 @@ const Workout = () => {
             </div>
 
             {/* Search Bar */}
-            <div className="relative mb-6">
+            <div className="relative mb-4">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 type="text"
@@ -288,6 +335,28 @@ const Workout = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 h-14 text-lg rounded-2xl bg-secondary/30 border-border focus:border-primary"
               />
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+              {categories.map((category) => {
+                const CategoryIcon = category.icon;
+                const isActive = selectedCategory === category.name;
+                return (
+                  <button
+                    key={category.name}
+                    onClick={() => setSelectedCategory(category.name)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap transition-all duration-300 border ${
+                      isActive 
+                        ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25" 
+                        : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50 hover:text-foreground"
+                    }`}
+                  >
+                    <CategoryIcon className="w-4 h-4" />
+                    <span className="text-sm font-medium">{category.name}</span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Exercise List */}
